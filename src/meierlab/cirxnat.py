@@ -4,6 +4,7 @@
 import subprocess
 import json
 import time
+import os
 
 
 class Cirxnat:
@@ -17,6 +18,7 @@ class Cirxnat:
         self.user = user
         self.password = password
         self.cookie = address.replace("/", "_").replace(":", "_")
+        self.proxy = os.getenv("http_proxy") if os.getenv("http_proxy") else "''"
 
     # Getters
     def get_user(self):
@@ -35,9 +37,10 @@ class Cirxnat:
         """Provide common base curl string for retrieving data"""
         curl_base = (
             f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x http://hpc-proxy.rcc.mcw.edu:3128/"
+            f" -x {self.proxy}"
             f" -s -X GET -u {self.user}:{self.password}"
-            f' -L "{self.address}/data/archive/projects/{self.project}/subjects{ending}"'
+            f' -L "{self.address}/data/archive/projects/"'
+            f'"{self.project}/subjects{ending}"'
         )
         return self._remove_doubles(curl_base)
 
@@ -149,7 +152,7 @@ class Cirxnat:
         """Returns a JSON formatted subject experiment scan DICOM header"""
         curl_cmd = (
             f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x http://hpc-proxy.rcc.mcw.edu:3128/"
+            f" -x {self.proxy}"
             f" -s -X GET -u {self.user}:{self.password}"
             f' -L "{self.address}/REST/services/dicomdump?src=/archive/projects/'
             f'{self.project}/experiments/{experiment_id}/scans/{scan_num}"'
@@ -166,7 +169,7 @@ class Cirxnat:
 
         curl_cmd = (
             f"curl -k -c {self.cookie} -b {self.cookie} -s"
-            f" -x http://hpc-proxy.rcc.mcw.edu:3128/"
+            f" -x {self.proxy}"
             f" -u {self.user}:{self.password}"
             f' -L "{self.address}/data/services/dicomdump?src=/archive/projects/'
             f"{self.project}/subjects/{subject_id}/experiments/{experiment_id}/"
@@ -203,9 +206,7 @@ class Cirxnat:
         scans_dcm = {}
         for scan in scans_list:
             tag_vals = {}
-            dcm_hdr = self.get_dicom_header(
-                experiment_id=experiment, scan_num=scan
-            )
+            dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
@@ -235,13 +236,11 @@ class Cirxnat:
 
         return scans_usability
 
-    def zip_scans_to_file(
-        self, subject_id, experiment_id, out_file, scan_list="ALL"
-    ):
+    def zip_scans_to_file(self, subject_id, experiment_id, out_file, scan_list="ALL"):
         """Returns a zip file with all of the resource files"""
         curl_cmd = (
             f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x http://hpc-proxy.rcc.mcw.edu:3128/"
+            f" -x {self.proxy}"
             f" -X GET -o {out_file} -s -u {self.user}:{self.password}"
             f" -L '{self.address}/data/archive/projects/{self.project}/"
             f"subjects/{subject_id}/experiments/{experiment_id}/"
@@ -268,9 +267,7 @@ class Cirxnat:
         self, subject_id, experiment_id, descriptions, out_file
     ):
         """Zip scans by series description"""
-        id_string = self._create_scan_ids(
-            subject_id, experiment_id, descriptions
-        )
+        id_string = self._create_scan_ids(subject_id, experiment_id, descriptions)
 
         if id_string != "":
             self.zip_scans_to_file(
