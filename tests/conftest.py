@@ -1,16 +1,17 @@
 import pytest
 import os
+from meierlab import config
 from meierlab.cirxnat import Cirxnat
 
 
 @pytest.fixture
 def user():
-    return "lespana"
+    return config.user
 
 
 @pytest.fixture
 def password():
-    return "deVXdwp22729"
+    return config.password
 
 
 @pytest.fixture
@@ -21,7 +22,7 @@ def project():
 @pytest.fixture
 def example_server(user, password, project):
     return Cirxnat(
-        address="https://devxnat.rcc.mcw.edu/apps",
+        address=config.address,
         user=user,
         password=password,
         project=project,

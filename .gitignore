@@ -143,3 +143,6 @@ dmypy.json
 
 # xnat
 https*
+
+# secrets
+config.py
