@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Update Brad's XNAT base for python3"""
-import subprocess
+"""XNAT base for python3 using requests"""
 import json
 import time
 import os
+import requests
+import pandas as pd
 
 
 class Cirxnat:
@@ -17,8 +18,9 @@ class Cirxnat:
         self.project = project
         self.user = user
         self.password = password
-        self.cookie = address.replace("/", "_").replace(":", "_")
+        self.cookie = {f"{project}_cookie": address.replace("/", "_").replace(":", "_")}
         self.proxy = os.getenv("http_proxy") if os.getenv("http_proxy") else "''"
+        self.auth = (self.user, self.password)
 
     # Getters
     def get_user(self):
@@ -29,20 +31,25 @@ class Cirxnat:
         """Return XNAT project"""
         return self.project
 
-    def _remove_doubles(self, curl_cmd):
+    def _remove_doubles(self, url):
         """Remove double slashes for URL"""
-        return curl_cmd.replace("//data", "/data")
+        return url.replace("//data", "/data")
 
-    def _get_curl_get_base(self, ending=""):
-        """Provide common base curl string for retrieving data"""
-        curl_base = (
-            f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x {self.proxy}"
-            f" -s -X GET -u {self.user}:{self.password}"
-            f' -L "{self.address}/data/archive/projects/"'
-            f'"{self.project}/subjects{ending}"'
+    def _get_base_url(self, ending=""):
+        """Provide base URL string for retrieving data"""
+        base_url = (
+            f'"{self.address}/data/archive/projects/"',
+            f'"{self.project}/subjects{ending}"',
         )
-        return self._remove_doubles(curl_base)
+        return self._remove_doubles(base_url)
+
+    def _get_dicom_url(self, ending=""):
+        """Provide base URL for retrieving DICOM data"""
+        dicom_url = (
+            f'"{self.address}/REST/services/dicomdump?src=/archive/projects/'
+            f'{self.project}{ending}"'
+        )
+        return self._remove_doubles(dicom_url)
 
     def get_address(self):
         """Return XNAT server address"""
@@ -59,13 +66,14 @@ class Cirxnat:
 
         Returns
         -------
-        Curl output
+        Text string request result
         """
-        curl_cmd = self._get_curl_get_base(f"?format={mformat}")
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        return curl_output
+        url = self._get_base_url()
+        payload = {"format": mformat}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
+        )
+        return request.text.rstrip()
 
     def get_subjects_json(self):
         """Get the subject list JSON and split it up into individual subjects
@@ -74,8 +82,8 @@ class Cirxnat:
         -------
         JSON object with subjects.
         """
-        curl_output = self.get_subjects("json")
-        return (json.loads(curl_output))["ResultSet"]["Result"]
+        request = self.get_subjects("json")
+        return (json.loads(request))["ResultSet"]["Result"]
 
     def get_experiments(self, subject_id, mformat="csv"):
         """Get experiments associated with a subject
@@ -89,15 +97,14 @@ class Cirxnat:
 
         Returns
         -------
-        Curl output.
+        Text string request result.
         """
-        curl_cmd = self._get_curl_get_base(
-            f"/{subject_id}/experiments?format={mformat}"
+        url = self._get_base_url(f"/{subject_id}/experiments")
+        payload = {"format": mformat}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
         )
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        return curl_output
+        return request.text.rstrip()
 
     def get_experiments_json(self, subject_id):
         """Get the experiments JSON and split them up
@@ -111,8 +118,8 @@ class Cirxnat:
         -------
         JSON object with subject's experiments.
         """
-        curl_output = self.get_experiments(subject_id, "json")
-        return (json.loads(curl_output))["ResultSet"]["Result"]
+        request = self.get_experiments(subject_id, "json")
+        return (json.loads(request))["ResultSet"]["Result"]
 
     def get_experiment_note_json(self, subject_id, experiment_id):
         """Get overall QA/scan note for experiment.
@@ -128,14 +135,14 @@ class Cirxnat:
         -------
         JSON object with note from XNAT.
         """
-        curl_cmd = self._get_curl_get_base(
-            f"/{subject_id}/experiments/{experiment_id}?format=json"
+        url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}")
+        payload = {"format": "json"}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
         )
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
+
         try:
-            out_json = json.loads(curl_output)
+            out_json = json.loads(request)
             return out_json["items"][0]["data_fields"]
         except (RuntimeError, ValueError):
             return ""
@@ -154,14 +161,14 @@ class Cirxnat:
 
         Returns
         -------
-        Curl output
+        Text string request result.
         """
-        curl_cmd = self._get_curl_get_base(
-            f"/{subject_id}/experiments/{experiment_id}/scans?format={mformat}"
+        url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
+        payload = {"format": mformat}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
         )
-        return subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
+        return request.text.rstrip()
 
     def get_scans_json(self, subject_id, experiment_id):
         """Get a subject's experiment's scans in JSON format
@@ -177,11 +184,11 @@ class Cirxnat:
         -------
         JSON object with scans from experiment.
         """
-        curl_output = self.get_scans(subject_id, experiment_id, "json")
-        return (json.loads(curl_output))["ResultSet"]["Result"]
+        request = self.get_scans(subject_id, experiment_id, "json")
+        return (json.loads(request))["ResultSet"]["Result"]
 
-    def get_scans_list(self, subject_id, experiment_id):
-        """Get a list of scan IDs from an experiment
+    def get_scans_dictionary(self, subject_id, experiment_id):
+        """Get a dictionary of scan IDs and their descriptions from an experiment
 
         Parameters
         ----------
@@ -192,39 +199,13 @@ class Cirxnat:
 
         Returns
         -------
-        List of scan IDs
+        Dictionary of scan ID: series_description
         """
         all_scans = self.get_scans_json(subject_id, experiment_id)
-        scans_list = []
+        scans_dictionary = {}
         for scan in all_scans:
-            scans_list.append(scan["ID"])
-        return scans_list
-
-    def get_scans_descriptions(self, subject_id, experiment_id):
-        """Get a list of scan series descriptions
-
-        Parameters
-        ----------
-        subject_id : str
-            Subject label from XNAT
-        experiment_id : str
-            Experiment label from XNAT
-
-        Returns
-        -------
-        List of scan series descriptions
-        """
-        curl_cmd = self._get_curl_get_base(
-            f"/{subject_id}/experiments/{experiment_id}/scans?format=json"
-        )
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        all_scans = (json.loads(curl_output))["ResultSet"]["Result"]
-        scans_list = []
-        for scan in all_scans:
-            scans_list.append(scan["series_description"])
-        return scans_list
+            scans_dictionary[scan["ID"]] = scan["series_description"]
+        return scans_dictionary
 
     def print_all_experiments(self):
         """Get a dictionary of subjects with experiment data.
@@ -263,19 +244,13 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object containing scan header information."""
-        curl_cmd = (
-            f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x {self.proxy}"
-            f" -s -X GET -u {self.user}:{self.password}"
-            f' -L "{self.address}/REST/services/dicomdump?src=/archive/projects/'
-            f'{self.project}/experiments/{experiment_id}/scans/{scan_num}"'
-        )
-        curl_cmd = self._remove_doubles(curl_cmd)
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        return (json.loads(curl_output))["ResultSet"]["Result"]
+        JSON object containing scan header information.
+        """
+        url = self._get_dicom_url(f"/experiments/{experiment_id}/scans/{scan_num}")
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy
+        ).text.rstrip()
+        return (json.loads(request))["ResultSet"]["Result"]
 
     def get_dicom_tag(self, subject_id, experiment_id, scan_num, tag_id):
         """Pass in the DICOM tag id as an 8 digit string,
@@ -296,21 +271,16 @@ class Cirxnat:
         -------
         JSON object with tag information.
         """
-
-        curl_cmd = (
-            f"curl -k -c {self.cookie} -b {self.cookie} -s"
-            f" -x {self.proxy}"
-            f" -u {self.user}:{self.password}"
-            f' -L "{self.address}/data/services/dicomdump?src=/archive/projects/'
-            f"{self.project}/subjects/{subject_id}/experiments/{experiment_id}/"
-            f'scans/{scan_num}&field={tag_id}"'
+        url = self._get_dicom_url(
+            f"/subjects/{subject_id}/experiments/{experiment_id}/scans/{scan_num}"
         )
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        return (json.loads(curl_output))["ResultSet"]["Result"]
+        payload = {"field": tag_id}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
+        ).text.rstrip()
+        return (json.loads(request))["ResultSet"]["Result"]
 
-    def get_dicom_tags(self, experiment, scans_list):
+    def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
         """Get common dicom tag info
 
         Parameters
@@ -322,10 +292,12 @@ class Cirxnat:
 
         Returns
         -------
-        Dictionary of scans with DICOM tags and their values.
+        Dictionary of scans DICOM tags: values.
         """
         tags = {
             "(0008,0008)": "image_type",
+            "(0008,0070)": "manufacturer",
+            "(0008,1090)": "scanner",
             "(0018,0050)": "slice_thickness",
             "(0018,0080)": "repetition_time",
             "(0018,0081)": "echo_time",
@@ -345,6 +317,10 @@ class Cirxnat:
             "(0028,0011)": "cols",
             "(0028,0030)": "pixel_spacing",
         }
+        if extra_tags:
+            for key, val in extra_tags.items():
+                tags[key] = val
+
         scans_dcm = {}
         for scan in scans_list:
             tag_vals = {}
@@ -373,13 +349,13 @@ class Cirxnat:
         -------
         Scan usability dictionary with ID, series_description, and QA note.
         """
-        curl_cmd = self._get_curl_get_base(
-            f"/{subject_id}/experiments/{experiment_id}/scans?format=json"
-        )
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        all_scans = (json.loads(curl_output))["ResultSet"]["Result"]
+        url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
+        payload = {"format": "json"}
+        request = requests.get(
+            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
+        ).text.rstrip()
+
+        all_scans = (json.loads(request))["ResultSet"]["Result"]
         scans_usability = {}
         for scan in all_scans:
             scans_usability[scan["ID"]] = [
@@ -404,23 +380,25 @@ class Cirxnat:
         scan_list : list
             List of scans to download. Default: 'ALL'
 
-        Returns
-        -------
-        Curl output
         """
-        curl_cmd = (
-            f"curl -k -c {self.cookie} -b {self.cookie}"
-            f" -x {self.proxy}"
-            f" -X GET -o {out_file} -s -u {self.user}:{self.password}"
-            f" -L '{self.address}/data/archive/projects/{self.project}/"
-            f"subjects/{subject_id}/experiments/{experiment_id}/"
-            f"scans/{scan_list}/files?format=zip'"
+        url = self._get_base_url(
+            f"/{subject_id}/experiments/{experiment_id}/scans/{scan_list}/files"
         )
-        curl_cmd = self._remove_doubles(curl_cmd)
-        curl_output = subprocess.run(
-            curl_cmd, shell=True, check=True, capture_output=True, text=True
-        ).stdout.rstrip()
-        return curl_output
+        payload = {"format": "zip"}
+        request = requests.get(
+            url,
+            auth=self.auth,
+            cookies=self.cookie,
+            proxies=self.proxy,
+            params=payload,
+            stream=True,
+        )
+        with open(out_file, "wb") as zip:
+            for chunk in request.iter_content(chunk_size=512):
+                if chunk:
+                    zip.write(chunk)
+
+        return
 
     def _create_scan_ids(self, subject_id, experiment_id, scan_desc_list):
         """Converts a scan description to a scanID."""
@@ -466,3 +444,30 @@ class Cirxnat:
             error = 1
 
         return error
+
+    def get_project_dcm_params(self):
+        """Get a pandas DataFrame containing DICOM parameter information
+        for all experiments in a project.
+
+        Returns
+        -------
+        DataFrame
+        """
+        proj_df = pd.DataFrame()
+        experiments = self.print_all_experiments()
+        for exp in experiments:
+            exp_scans = {}
+            scans = self.get_scans_dictionary(
+                exp["subject_label"], exp["experiment_label"]
+            )
+            scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
+
+            for scan, tag_vals in scans_dcm.items():
+                for tag, val in tag_vals.items():
+                    column = f"{scans[scan]}_{tag}"
+                    exp_scans[column] = val
+
+            exp_df = pd.DataFrame(exp_scans, index=[exp["experiment_label"]])
+            proj_df = pd.concat([proj_df, exp_df])
+
+        return proj_df
