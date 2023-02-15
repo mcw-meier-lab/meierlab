@@ -310,7 +310,7 @@ class Cirxnat:
         ).stdout.rstrip()
         return (json.loads(curl_output))["ResultSet"]["Result"]
 
-    def get_dicom_tags(self, experiment, scans_list):
+    def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
         """Get common dicom tag info
 
         Parameters
@@ -326,6 +326,8 @@ class Cirxnat:
         """
         tags = {
             "(0008,0008)": "image_type",
+            "(0008,0070)": "manufacturer",
+            "(0008,1090)": "scanner",
             "(0018,0050)": "slice_thickness",
             "(0018,0080)": "repetition_time",
             "(0018,0081)": "echo_time",
@@ -345,6 +347,9 @@ class Cirxnat:
             "(0028,0011)": "cols",
             "(0028,0030)": "pixel_spacing",
         }
+        if extra_tags:
+            for key, val in extra_tags.items():
+                tags[key] = val
         scans_dcm = {}
         for scan in scans_list:
             tag_vals = {}
