@@ -19,7 +19,10 @@ class Cirxnat:
         self.user = user
         self.password = password
         self.cookie = {f"{project}_cookie": address.replace("/", "_").replace(":", "_")}
-        self.proxy = os.getenv("http_proxy") if os.getenv("http_proxy") else "''"
+        self.proxy = {
+            "http": os.getenv("http_proxy") if os.getenv("http_proxy") else None,
+            "https": os.getenv("https_proxy") if os.getenv("https_proxy") else None,
+        }
         self.auth = (self.user, self.password)
 
     # Getters
@@ -38,16 +41,15 @@ class Cirxnat:
     def _get_base_url(self, ending=""):
         """Provide base URL string for retrieving data"""
         base_url = (
-            f'"{self.address}/data/archive/projects/"',
-            f'"{self.project}/subjects{ending}"',
+            f"{self.address}/data/archive/projects/{self.project}/subjects{ending}"
         )
         return self._remove_doubles(base_url)
 
     def _get_dicom_url(self, ending=""):
         """Provide base URL for retrieving DICOM data"""
         dicom_url = (
-            f'"{self.address}/REST/services/dicomdump?src=/archive/projects/'
-            f'{self.project}{ending}"'
+            f"{self.address}/REST/services/dicomdump?src=/archive/projects/"
+            f"{self.project}{ending}"
         )
         return self._remove_doubles(dicom_url)
 
@@ -71,7 +73,11 @@ class Cirxnat:
         url = self._get_base_url()
         payload = {"format": mformat}
         request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
+            url,
+            auth=(self.user, self.password),
+            cookies=self.cookie,
+            proxies=self.proxy,
+            params=payload,
         )
         return request.text.rstrip()
 
