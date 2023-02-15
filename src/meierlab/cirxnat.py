@@ -72,13 +72,12 @@ class Cirxnat:
         """
         url = self._get_base_url()
         payload = {"format": mformat}
-        request = requests.get(
-            url,
-            auth=(self.user, self.password),
-            cookies=self.cookie,
-            proxies=self.proxy,
-            params=payload,
-        )
+        with requests.Session() as session:
+            session.auth = (self.user, self.password)
+            request = session.get(
+                url,
+                params=payload,
+            )
         return request.text.rstrip()
 
     def get_subjects_json(self):
