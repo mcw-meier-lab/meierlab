@@ -1,17 +1,19 @@
 import pytest
 import os
+import pandas as pd
+import meierlab.config as config
 
 
 def test_get_user(example_server):
-    assert example_server.get_user() == "lespana"
+    assert example_server.get_user() == config.user
 
 
 def test_get_project(example_server):
-    assert example_server.get_project() == "Sandbox"
+    assert example_server.get_project() == config.project
 
 
 def test_get_address(example_server):
-    assert example_server.get_address() == "https://devxnat.rcc.mcw.edu/apps"
+    assert example_server.get_address() == config.address
 
 
 def test_get_subjects_json(example_server):
@@ -55,72 +57,39 @@ def test_get_scans_json(example_server, example_subject_id, example_experiment_i
     }
 
 
-def test_get_scans_list(
+def test_get_scans_dictionary(
     example_server,
     example_subject_id,
     example_experiment_id,
 ):
-    assert example_server.get_scans_list(example_subject_id, example_experiment_id) == [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "500",
-        "501",
-        "502",
-        "700",
-        "701",
-        "702",
-        "900",
-        "901",
-        "902",
-        "1100",
-        "1101",
-        "1102",
-    ]
-
-
-def test_get_scans_descriptions(
-    example_server,
-    example_subject_id,
-    example_experiment_id,
-):
-    assert example_server.get_scans_descriptions(
+    assert example_server.get_scans_dictionary(
         example_subject_id, example_experiment_id
-    ) == [
-        "3 Plane Localizer",
-        "3 Plane Localizer",
-        "HighRes_3Dspgr_2Nex",
-        "ZTE -Pseudo-CT",
-        "WATER: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "FOV_Check_P20_3Dspgr_R2_Mp1_ARC_HS",
-        "WATER: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "UlnarDev_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "WATER: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "WristFlex_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "WATER: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "Rotation_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "FAT: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "InPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "OutPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "FAT: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "InPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "OutPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "FAT: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "InPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "OutPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "FAT: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "InPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "OutPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-    ]
+    ) == {
+        "1": "3 Plane Localizer",
+        "2": "3 Plane Localizer",
+        "3": "HighRes_3Dspgr_2Nex",
+        "4": "ZTE -Pseudo-CT",
+        "5": "WATER: HighRes_LAVA_3Nex_0.8x0.8x1mm",
+        "6": "FOV_Check_P20_3Dspgr_R2_Mp1_ARC_HS",
+        "7": "WATER: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
+        "8": "UlnarDev_P20_3Dspgr_R2_Mp40_ARC_HS",
+        "9": "WATER: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
+        "10": "WristFlex_P20_3Dspgr_R2_Mp40_ARC_HS",
+        "11": "WATER: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
+        "12": "Rotation_P20_3Dspgr_R2_Mp40_ARC_HS",
+        "500": "FAT: HighRes_LAVA_3Nex_0.8x0.8x1mm",
+        "501": "InPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
+        "502": "OutPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
+        "700": "FAT: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
+        "701": "InPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
+        "702": "OutPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
+        "900": "FAT: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
+        "901": "InPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
+        "902": "OutPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
+        "1100": "FAT: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
+        "1101": "InPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
+        "1102": "OutPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
+    }
 
 
 def test_print_all_experiments(example_server):
@@ -294,3 +263,7 @@ def test_zip_scan_description_to_file_fail(
         )
         == 1
     )
+
+
+def test_get_project_dcm_params(example_server):
+    assert type(example_server.get_project_dcm_params()) == pd.DataFrame()
