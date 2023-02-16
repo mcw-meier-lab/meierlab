@@ -326,7 +326,11 @@ class Cirxnat:
         """
         vals = dcm_value.split("\n")
         try:
-            value = list(filter(lambda x: "lRxChannel" in x, vals))[-1].split("= ")[-1]
+            value = (
+                list(filter(lambda x: "lRxChannel" in x, vals))[-1]
+                .split("=")[-1]
+                .strip()
+            )
         except Exception:
             value = ""
 
