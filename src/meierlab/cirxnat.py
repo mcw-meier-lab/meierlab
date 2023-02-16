@@ -5,7 +5,6 @@ import subprocess
 import json
 import time
 import os
-import re
 
 
 class Cirxnat:
@@ -325,12 +324,11 @@ class Cirxnat:
         str
             Final coil channel corresponding to the head coil used.
         """
-        vals = str(dcm_value[45]["value"]).replace("&quot;", '"').split()
-        for ii in range(len(vals) - 1, 0, -1):
-            if "lRxChannel" in vals[ii]:
-                if vals[ii + 2] != "" and re.search(r"\d", vals[ii + 2]):
-                    value = vals[ii + 2]
-                    break
+        vals = dcm_value[45]["value"].split("\n")
+        try:
+            value = list(filter(lambda x: "lRxChannel" in x, vals))[-1].split("= ")[-1]
+        except Exception:
+            value = ""
 
         return value
 
