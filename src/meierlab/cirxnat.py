@@ -5,6 +5,7 @@ import subprocess
 import json
 import time
 import os
+import re
 
 
 class Cirxnat:
@@ -310,6 +311,29 @@ class Cirxnat:
         ).stdout.rstrip()
         return (json.loads(curl_output))["ResultSet"]["Result"]
 
+    def _parse_shadow_hdr(self, dcm_value):
+        """Parses the Siemens shadow header to get head coil value.
+        Not pretty, but there isn't a regular tag to retrieve this.
+
+        Parameters
+        ----------
+        dcm_value : list
+            Shadow header value from `get_dicom_tag`.
+
+        Returns
+        -------
+        str
+            Final coil channel corresponding to the head coil used.
+        """
+        vals = str(dcm_value[45]["value"]).replace("&quot;", '"').split()
+        for ii in range(len(vals) - 1, 0, -1):
+            if "lRxChannelConnected" in vals[ii]:
+                if vals[ii + 2] != "" and re.search(r"\d", vals[ii + 2]):
+                    value = vals[ii + 2]
+                    break
+
+        return value
+
     def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
         """Get common dicom tag info
 
@@ -346,6 +370,7 @@ class Cirxnat:
             "(0028,0010)": "rows",
             "(0028,0011)": "cols",
             "(0028,0030)": "pixel_spacing",
+            "(0029,1020)": "channels",
         }
         if extra_tags:
             for key, val in extra_tags.items():
@@ -358,7 +383,12 @@ class Cirxnat:
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
                 if dcm_tag["tag1"] in tags.keys():
-                    tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
+                    if tags[dcm_tag["tag1"]] == "(0029,1020)":
+                        tag_vals[tags[dcm_tag["tag1"]]] = self._parse_shadow_hdr(
+                            dcm_tag["value"]
+                        )
+                    else:
+                        tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
 
             scans_dcm[scan] = tag_vals
 
