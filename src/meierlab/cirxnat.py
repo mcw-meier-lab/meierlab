@@ -382,10 +382,13 @@ class Cirxnat:
             tag_vals = {}
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
-            channel_hdr = list(filter(lambda x: "lRxChannel" in x["value"], dcm_hdr))[
-                0
-            ]["value"]
-            tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+            try:
+                channel_hdr = list(
+                    filter(lambda x: "lRxChannel" in x["value"], dcm_hdr)
+                )[0]["value"]
+                tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+            except Exception:
+                tag_vals["channels"] = ""
 
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
