@@ -381,7 +381,7 @@ class Cirxnat:
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
                 if dcm_tag["tag1"] in tags.keys():
-                    if tags[dcm_tag["tag1"]] == "(0029,1020)":
+                    if tags[dcm_tag["tag1"]] == "channels":
                         tag_vals[tags[dcm_tag["tag1"]]] = self._parse_shadow_hdr(
                             dcm_tag["value"]
                         )
