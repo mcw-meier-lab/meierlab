@@ -378,15 +378,18 @@ class Cirxnat:
             tag_vals = {}
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
+            idx = 0
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
                 if dcm_tag["tag1"] in tags.keys():
-                    if tags[dcm_tag["tag1"]] == "channels":
+                    if tags[dcm_tag["tag1"]] == "channels" and idx == 45:
                         tag_vals[tags[dcm_tag["tag1"]]] = self._parse_shadow_hdr(
                             dcm_tag["value"]
                         )
-                    else:
+                    elif tags[dcm_tag["tag1"]] != "channels":
                         tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
+
+                idx += 1
 
             scans_dcm[scan] = tag_vals
 
