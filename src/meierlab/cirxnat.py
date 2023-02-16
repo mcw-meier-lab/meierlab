@@ -73,7 +73,7 @@ class Cirxnat:
         url = self._get_base_url()
         payload = {"format": mformat}
         with requests.Session() as session:
-            session.auth = (self.user, self.password)
+            session.auth = requests.auth.HTTPBasicAuth(self.user, self.password)
             request = session.get(
                 url,
                 params=payload,
