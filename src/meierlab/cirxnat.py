@@ -324,7 +324,7 @@ class Cirxnat:
         str
             Final coil channel corresponding to the head coil used.
         """
-        vals = dcm_value[45]["value"].split("\n")
+        vals = dcm_value.split("\n")
         try:
             value = list(filter(lambda x: "lRxChannel" in x, vals))[-1].split("= ")[-1]
         except Exception:
@@ -378,18 +378,16 @@ class Cirxnat:
             tag_vals = {}
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
-            idx = 0
+            channel_hdr = list(filter(lambda x: "lRxChannel" in x["value"], dcm_hdr))[
+                0
+            ]["value"]
+            tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
                 if dcm_tag["tag1"] in tags.keys():
-                    if tags[dcm_tag["tag1"]] == "channels" and idx == 45:
-                        tag_vals[tags[dcm_tag["tag1"]]] = self._parse_shadow_hdr(
-                            dcm_tag["value"]
-                        )
-                    elif tags[dcm_tag["tag1"]] != "channels":
+                    if tags[dcm_tag["tag1"]] != "channels":
                         tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
-
-                idx += 1
 
             scans_dcm[scan] = tag_vals
 
