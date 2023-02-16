@@ -327,7 +327,7 @@ class Cirxnat:
         """
         vals = str(dcm_value[45]["value"]).replace("&quot;", '"').split()
         for ii in range(len(vals) - 1, 0, -1):
-            if "lRxChannelConnected" in vals[ii]:
+            if "lRxChannel" in vals[ii]:
                 if vals[ii + 2] != "" and re.search(r"\d", vals[ii + 2]):
                     value = vals[ii + 2]
                     break
