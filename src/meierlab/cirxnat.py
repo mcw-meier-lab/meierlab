@@ -327,7 +327,7 @@ class Cirxnat:
         vals = dcm_value.split("\n")
         try:
             value = (
-                list(filter(lambda x: "lRxChannel" in x, vals))[-1]
+                list(filter(lambda x: "CoilSelect" in x, vals))[-1]
                 .split("=")[-1]
                 .strip()
             )
@@ -384,7 +384,7 @@ class Cirxnat:
 
             try:
                 channel_hdr = list(
-                    filter(lambda x: "lRxChannel" in x["value"], dcm_hdr)
+                    filter(lambda x: "CoilSelect" in x["value"], dcm_hdr)
                 )[0]["value"]
                 tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
             except Exception:
