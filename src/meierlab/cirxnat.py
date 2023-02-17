@@ -23,7 +23,9 @@ class Cirxnat:
             "http": os.getenv("http_proxy") if os.getenv("http_proxy") else None,
             "https": os.getenv("https_proxy") if os.getenv("https_proxy") else None,
         }
-        self.auth = (self.user, self.password)
+        self.session = requests.Session()
+        self.session.auth = (str(self.user), str(self.password))
+        self.session.post(f"{self.address}/app/template")
 
     # Getters
     def get_user(self):
@@ -72,12 +74,10 @@ class Cirxnat:
         """
         url = self._get_base_url()
         payload = {"format": mformat}
-        with requests.Session() as session:
-            session.auth = requests.auth.HTTPBasicAuth(self.user, self.password)
-            request = session.get(
-                url,
-                params=payload,
-            )
+        request = self.session.get(
+            url,
+            params=payload,
+        )
         return request.text.rstrip()
 
     def get_subjects_json(self):
