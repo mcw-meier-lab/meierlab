@@ -383,10 +383,14 @@ class Cirxnat:
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
             try:
-                channel_hdr = list(
-                    filter(lambda x: "CoilSelect" in x["value"], dcm_hdr)
-                )[0]["value"]
-                tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+                # channel_hdr = list(
+                #    filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr)
+                # )[0]["value"]
+                # tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+                channel_hdr_num = len(
+                    list(filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr))
+                )
+                tag_vals["channels"] = channel_hdr_num
             except Exception:
                 tag_vals["channels"] = ""
 
