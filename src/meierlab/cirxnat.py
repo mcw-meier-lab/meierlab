@@ -326,11 +326,7 @@ class Cirxnat:
         """
         vals = dcm_value.split("\n")
         try:
-            value = (
-                list(filter(lambda x: "CoilSelect" in x, vals))[-1]
-                .split("=")[-1]
-                .strip()
-            )
+            value = len(list(filter(lambda x: "RxChannelConnected" in x, vals)))
         except Exception:
             value = ""
 
@@ -387,10 +383,10 @@ class Cirxnat:
                 #    filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr)
                 # )[0]["value"]
                 # tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
-                channel_hdr_num = len(
-                    list(filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr))
+                channel_hdr = list(
+                    filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr)
                 )
-                tag_vals["channels"] = channel_hdr_num
+                tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
             except Exception:
                 tag_vals["channels"] = ""
 
