@@ -16,7 +16,7 @@ def password():
 
 @pytest.fixture
 def project():
-    return "Sandbox"
+    return config.project
 
 
 @pytest.fixture
