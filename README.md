@@ -10,7 +10,7 @@ $ pip install meierlab
 
 ## Usage
 
-- TODO
+-   TODO
 
 ## Contributing
 
@@ -18,7 +18,8 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## License
 
-`meierlab` was created by Lezlie Espana. Lezlie Espana retains all rights to the source and it may not be reproduced, distributed, or used to create derivative works.
+Copyright (c) 2023, MCW Meier-Lab.
+`meierlab` was created by Lezlie España as part of MCW Meier-Lab. It is licensed under the BSD 3-Clause License.
 
 ## Credits
 
