@@ -16,16 +16,31 @@ class Cirxnat:
     def __init__(self, address, project, user, password):
         self.address = address
         self.project = project
-        self.user = user
-        self.password = password
-        self.cookie = {f"{project}_cookie": address.replace("/", "_").replace(":", "_")}
+        self.user = str(user)
+        self.password = str(password)
         self.proxy = {
             "http": os.getenv("http_proxy") if os.getenv("http_proxy") else None,
             "https": os.getenv("https_proxy") if os.getenv("https_proxy") else None,
         }
         self.session = requests.Session()
-        self.session.auth = (str(self.user), str(self.password))
-        self.session.post(f"{self.address}/app/template")
+        self.session.verify = False
+        self.session.auth = requests.auth.HTTPBasicAuth(self.user, self.password)
+        self.session.proxies = self.proxy
+
+        """
+        req = requests.Request(
+            "POST",
+            self.address,
+            auth=self.session.auth,
+            headers={"Authorization": f"Basic {self.user} {self.password}"},
+        )
+        prepped = self.session.prepare_request(req)
+        print(
+            f"{prepped.method} {prepped.url}\n",
+            "\r\n".join("{}: {}".format(k, v) for k, v in prepped.headers.items()),
+            prepped.body,
+        )
+        """
 
     # Getters
     def get_user(self):
@@ -74,11 +89,8 @@ class Cirxnat:
         """
         url = self._get_base_url()
         payload = {"format": mformat}
-        request = self.session.get(
-            url,
-            params=payload,
-        )
-        return request.text.rstrip()
+        response = self.session.get(url, params=payload)
+        return response.text.rstrip()
 
     def get_subjects_json(self):
         """Get the subject list JSON and split it up into individual subjects
@@ -87,8 +99,8 @@ class Cirxnat:
         -------
         JSON object with subjects.
         """
-        request = self.get_subjects("json")
-        return (json.loads(request))["ResultSet"]["Result"]
+        response = self.get_subjects("json")
+        return (json.loads(response))["ResultSet"]["Result"]
 
     def get_experiments(self, subject_id, mformat="csv"):
         """Get experiments associated with a subject
@@ -106,10 +118,8 @@ class Cirxnat:
         """
         url = self._get_base_url(f"/{subject_id}/experiments")
         payload = {"format": mformat}
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
-        )
-        return request.text.rstrip()
+        response = self.session.get(url, params=payload)
+        return response.text.rstrip()
 
     def get_experiments_json(self, subject_id):
         """Get the experiments JSON and split them up
@@ -123,8 +133,8 @@ class Cirxnat:
         -------
         JSON object with subject's experiments.
         """
-        request = self.get_experiments(subject_id, "json")
-        return (json.loads(request))["ResultSet"]["Result"]
+        response = self.get_experiments(subject_id, "json")
+        return (json.loads(response))["ResultSet"]["Result"]
 
     def get_experiment_note_json(self, subject_id, experiment_id):
         """Get overall QA/scan note for experiment.
@@ -142,12 +152,10 @@ class Cirxnat:
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}")
         payload = {"format": "json"}
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
-        )
+        response = self.session.get(url, params=payload)
 
         try:
-            out_json = json.loads(request)
+            out_json = response.json()
             return out_json["items"][0]["data_fields"]
         except (RuntimeError, ValueError):
             return ""
@@ -170,10 +178,8 @@ class Cirxnat:
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": mformat}
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
-        )
-        return request.text.rstrip()
+        response = self.session.get(url, params=payload)
+        return response.text.rstrip()
 
     def get_scans_json(self, subject_id, experiment_id):
         """Get a subject's experiment's scans in JSON format
@@ -189,8 +195,8 @@ class Cirxnat:
         -------
         JSON object with scans from experiment.
         """
-        request = self.get_scans(subject_id, experiment_id, "json")
-        return (json.loads(request))["ResultSet"]["Result"]
+        response = self.get_scans(subject_id, experiment_id, "json")
+        return (json.loads(response))["ResultSet"]["Result"]
 
     def get_scans_dictionary(self, subject_id, experiment_id):
         """Get a dictionary of scan IDs and their descriptions from an experiment
@@ -237,6 +243,28 @@ class Cirxnat:
                 experiment_list.append(exp_dict)
         return experiment_list
 
+    def _parse_shadow_hdr(self, dcm_value):
+        """Parses the Siemens shadow header to get head coil value.
+        Not pretty, but there isn't a regular tag to retrieve this.
+
+        Parameters
+        ----------
+        dcm_value : list
+            Shadow header value from `get_dicom_tag`.
+
+        Returns
+        -------
+        str
+            Number of connected coils corresponding to the head coil used.
+        """
+        vals = dcm_value.split("\n")
+        try:
+            value = str(len(list(filter(lambda x: "RxChannelConnected" in x, vals))))
+        except Exception:
+            value = ""
+
+        return value
+
     def get_dicom_header(self, experiment_id, scan_num):
         """Get a JSON formatted subject experiment scan DICOM header
 
@@ -252,10 +280,8 @@ class Cirxnat:
         JSON object containing scan header information.
         """
         url = self._get_dicom_url(f"/experiments/{experiment_id}/scans/{scan_num}")
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy
-        ).text.rstrip()
-        return (json.loads(request))["ResultSet"]["Result"]
+        response = self.session.get(url).text.rstrip()
+        return (json.loads(response))["ResultSet"]["Result"]
 
     def get_dicom_tag(self, subject_id, experiment_id, scan_num, tag_id):
         """Pass in the DICOM tag id as an 8 digit string,
@@ -280,10 +306,8 @@ class Cirxnat:
             f"/subjects/{subject_id}/experiments/{experiment_id}/scans/{scan_num}"
         )
         payload = {"field": tag_id}
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
-        ).text.rstrip()
-        return (json.loads(request))["ResultSet"]["Result"]
+        response = self.session.get(url, params=payload).text.rstrip()
+        return (json.loads(response))["ResultSet"]["Result"]
 
     def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
         """Get common dicom tag info
@@ -321,6 +345,7 @@ class Cirxnat:
             "(0028,0010)": "rows",
             "(0028,0011)": "cols",
             "(0028,0030)": "pixel_spacing",
+            "(0029,1020)": "channels",
         }
         if extra_tags:
             for key, val in extra_tags.items():
@@ -330,6 +355,14 @@ class Cirxnat:
         for scan in scans_list:
             tag_vals = {}
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
+
+            try:
+                channel_hdr = list(
+                    filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr)
+                )[0]["value"]
+                tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
+            except Exception:
+                tag_vals["channels"] = ""
 
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
@@ -356,11 +389,9 @@ class Cirxnat:
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": "json"}
-        request = requests.get(
-            url, auth=self.auth, cookies=self.cookie, proxies=self.proxy, params=payload
-        ).text.rstrip()
+        response = self.session.get(url, params=payload).text.rstrip()
 
-        all_scans = (json.loads(request))["ResultSet"]["Result"]
+        all_scans = (json.loads(response))["ResultSet"]["Result"]
         scans_usability = {}
         for scan in all_scans:
             scans_usability[scan["ID"]] = [
@@ -390,16 +421,13 @@ class Cirxnat:
             f"/{subject_id}/experiments/{experiment_id}/scans/{scan_list}/files"
         )
         payload = {"format": "zip"}
-        request = requests.get(
+        response = self.session.get(
             url,
-            auth=self.auth,
-            cookies=self.cookie,
-            proxies=self.proxy,
             params=payload,
             stream=True,
         )
         with open(out_file, "wb") as zip:
-            for chunk in request.iter_content(chunk_size=512):
+            for chunk in response.iter_content(chunk_size=512):
                 if chunk:
                     zip.write(chunk)
 
@@ -456,7 +484,8 @@ class Cirxnat:
 
         Returns
         -------
-        DataFrame
+        proj_df
+            `pandas.DataFrame()` containing DICOM parameter information
         """
         proj_df = pd.DataFrame()
         experiments = self.print_all_experiments()
