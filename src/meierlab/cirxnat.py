@@ -309,6 +309,7 @@ class Cirxnat:
         response = self.session.get(url, params=payload).text.rstrip()
         return (json.loads(response))["ResultSet"]["Result"]
 
+
     def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
         """Get common dicom tag info
 
@@ -367,7 +368,8 @@ class Cirxnat:
             for dcm_tag in dcm_hdr:
                 # pylint: disable=consider-iterating-dictionary
                 if dcm_tag["tag1"] in tags.keys():
-                    tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
+                    if tags[dcm_tag["tag1"]] != "channels":
+                        tag_vals[tags[dcm_tag["tag1"]]] = dcm_tag["value"]
 
             scans_dcm[scan] = tag_vals
 
