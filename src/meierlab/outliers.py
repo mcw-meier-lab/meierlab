@@ -38,16 +38,12 @@ def compute_outlier_nii(nii_img,mask,mean,sd,
 
     return outlier_nii
 
-def compute_outlier_values(in_folder, save_nii=False, mask=None):
+def compute_outlier_values(nii_images, out_folder, save_nii=False, mask=None):
     out_df = pd.DataFrame(
         columns=["subject","total_voxels","pos_count",
                  "pos_pct","neg_count","neg_pct"]
     )
 
-    nii_images = []
-    for img in list(Path(in_folder).glob("*nii.gz")):
-        nii_images.append(img)
-    
     if not mask:
         mask_nii = create_avg_mask(nii_images)
 
@@ -65,7 +61,7 @@ def compute_outlier_values(in_folder, save_nii=False, mask=None):
                                           )
         outlier_masked = math_img('mask_img * img',mask_img=mask_nii,img=outlier_nii)
         if save_nii:
-            save(outlier_masked, in_folder / f"{subject}_outliers")
+            save(outlier_masked, out_folder / f"{subject}_outliers")
 
         pos_count = np.count_nonzero(outlier_masked.get_fdata() > 0)
         neg_count = np.count_nonzero(outlier_masked.get_fdata() < 0)
