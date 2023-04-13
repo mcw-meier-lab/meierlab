@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import io
 import plotly.graph_objects as go
-from dash import Dash, dcc, html
+from dash import dcc, html
 from base64 import b64encode
 
 
@@ -38,8 +38,14 @@ def gen_figs(outlier_df,x_cols,
 
     return out_figs
 
-def get_app(figures):
-    app = Dash(__name__)
+def get_app(figures,app_type=None):
+    if app_type == "jupyter":
+        from jupyter_dash import JupyterDash
+        app = JupyterDash(__name__)
+    else:
+        from dash import Dash
+        app = Dash(__name__)
+
     buffer = io.StringIO()
     for fig in figures:
         fig.write_html(buffer)
