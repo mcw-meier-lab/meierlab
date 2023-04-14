@@ -17,7 +17,7 @@ def gen_figs(outlier_df,x_cols,
             y=outlier_df[y[0]],
             line_color='blue' if 'neg' in y[0] else 'orange',
             name=y[0],
-            pointpos=-0.5 if 'neg' in y[0] else 1.2,
+            pointpos=1.2,
             text=outlier_df['subject'],
             hovertemplate="%{y}: <br>%{text}"
         ))
@@ -26,7 +26,7 @@ def gen_figs(outlier_df,x_cols,
             y=outlier_df[y[1]],
             line_color='blue' if 'neg' in y[1] else 'orange',
             name=y[1],
-            pointpos=-0.5 if 'neg' in y[1] else 1.2,
+            pointpos=1.2,
             text=outlier_df['subject'],
             hovertemplate="%{y}: <br>%{text}" 
         ))
