@@ -5,28 +5,28 @@ import numpy as np
 from pathlib import Path
 from nibabel import load, save, Nifti1Image
 
-def load_dcm(realDicomLocation,imagDicomLocation):
-    scanSetting = {}
-    iField = None
+def load_dcm(real_dcm_dir, imag_dcm_dir):
+    scan_meta = {}
+    field_map = None
     
     slice_tag = 0x20,0x9057
     echo_tag = 0x18,0x86
 
-    for dcm_file in list(Path(realDicomLocation).glob('**/*dcm')):
+    for dcm_file in list(Path(real_dcm_dir).glob('**/*dcm')):
         dcm = dicom.read_file(dcm_file)
-        thisSlice=(dcm[slice_tag].value)-1
-        thisEcho=(dcm[echo_tag].value)-1
-        if thisSlice == 0 and thisEcho == 0:
+        slice_val=(dcm[slice_tag].value)-1
+        echo_val=(dcm[echo_tag].value)-1
+        if slice_val == 0 and echo_val == 0:
             ref_vals = dcm    
 
     # image size
     cols_qsm = int(ref_vals.Columns)
     rows_qsm = int(ref_vals.Rows)
     echoes_qsm = int(ref_vals.EchoTrainLength)
-    slices_qsm = int(len(list(Path(realDicomLocation).glob("**/*dcm")))/echoes_qsm)    
+    slices_qsm = int(len(list(Path(real_dcm_dir).glob("**/*dcm")))/echoes_qsm)    
         
     # resolution 
-    col_res_qsm = (ref_vals.PixelSpacing[0]) #are these backwards?
+    col_res_qsm = (ref_vals.PixelSpacing[0])
     row_res_qsm = (ref_vals.PixelSpacing[1])
     slice_res_qsm = (ref_vals.SliceThickness)  
     voxel_size = [col_res_qsm, row_res_qsm, slice_res_qsm]
@@ -39,49 +39,57 @@ def load_dcm(realDicomLocation,imagDicomLocation):
     B0_dir = [0,0,1]
     gyro = 42.58*1e6
     
-    scanSetting["B0Dir"] = B0_dir         
-    scanSetting["gyro"] = gyro
-    scanSetting["B0"] = float(ref_vals.MagneticFieldStrength)
-    scanSetting["CF"] = float(ref_vals.MagneticFieldStrength)*gyro
-    scanSetting["numEchoes"] = int(ref_vals.EchoTrainLength)
-    scanSetting["dTE"] = float(ref_vals.LargestImagePixelValue)*1e-6
-    scanSetting["echoTimes"] = None       
-    scanSetting["matrxiSize"] = [cols_qsm, rows_qsm, slices_qsm] 
-    scanSetting["voxelSize"] = [col_res_qsm, row_res_qsm, slice_res_qsm]
-    scanSetting["orginPos"] = origin_qsm
+    scan_meta["B0Dir"] = B0_dir         
+    scan_meta["gyro"] = gyro
+    scan_meta["B0"] = float(ref_vals.MagneticFieldStrength)
+    scan_meta["CF"] = float(ref_vals.MagneticFieldStrength)*gyro
+    scan_meta["numEchoes"] = int(ref_vals.EchoTrainLength)
+    scan_meta["dTE"] = float(ref_vals.LargestImagePixelValue)*1e-6
+    scan_meta["echoTimes"] = None       
+    scan_meta["matrxiSize"] = [cols_qsm, rows_qsm, slices_qsm] 
+    scan_meta["voxelSize"] = [col_res_qsm, row_res_qsm, slice_res_qsm]
+    scan_meta["orginPos"] = origin_qsm
         
     # read the dicoms 
-    realData = np.zeros((cols_qsm, rows_qsm, slices_qsm, echoes_qsm), dtype=np.float64)
-    imagData = np.zeros((cols_qsm, rows_qsm, slices_qsm, echoes_qsm), dtype=np.float64)
+    real_data = np.zeros((cols_qsm, rows_qsm, slices_qsm, echoes_qsm), dtype=np.float64)
+    imag_data = np.zeros((cols_qsm, rows_qsm, slices_qsm, echoes_qsm), dtype=np.float64)
     
-    for dcm_file in list(Path(realDicomLocation).glob('**/*dcm')):
+    for dcm_file in list(Path(real_dcm_dir).glob('**/*dcm')):
         dcm = dicom.read_file(dcm_file)
-        thisSlice=(dcm[slice_tag].value)-1
-        thisEcho=(dcm[echo_tag].value)-1
-        realData[:,:,thisSlice,thisEcho] = dcm.pixel_array
+        slice_val=(dcm[slice_tag].value)-1
+        echo_val=(dcm[echo_tag].value)-1
+        real_data[:,:,slice_val,echo_val] = dcm.pixel_array
 
-    for dcm_file in list(Path(imagDicomLocation).glob('**/*dcm')):
+    for dcm_file in list(Path(imag_dcm_dir).glob('**/*dcm')):
         dcm = dicom.read_file(dcm_file)
-        thisSlice=(dcm[slice_tag].value)-1
-        thisEcho=(dcm[echo_tag].value)-1
-        imagData[:,:,thisSlice,thisEcho] = dcm.pixel_array
+        slice_val=(dcm[slice_tag].value)-1
+        echo_val=(dcm[echo_tag].value)-1
+        imag_data[:,:,slice_val,echo_val] = dcm.pixel_array
 
-    realData = np.flip(np.transpose(realData, [1,0,2,3]), 1)
-    imagData = np.flip(np.transpose(imagData, [1,0,2,3]), 1)
-    iField = realData + 1j*imagData
+    #realData = np.flip(np.transpose(realData, [1,0,2,3]), 1) - orig but L/R flipped
+    #imagData = np.flip(np.transpose(imagData, [1,0,2,3]), 1) - orig but L/R flipped
+
+    real_data = np.flip(np.flip(np.transpose(real_data, [1,0,2,3]), 1), 0)
+    imag_data = np.flip(np.flip(np.transpose(imag_data, [1,0,2,3]), 1), 0)
+    field_map = real_data + 1j*imag_data
         
-    return iField, scanSetting
+    return field_map, scan_meta
 
-def get_last_echo(source_dir, out_dir, target_nii, out_file):
-    ifield, _ = load_dcm(
-        list(Path(source_dir).glob('*Real*/resources/DICOM'))[0],
-        list(Path(source_dir).glob('*Imag*/resources/DICOM'))[0]
-    )
+def get_last_echo(real_dcm_dir, imag_dcm_dir, target_file, out_dir, out_file):
+    field_map, _ = load_dcm(real_dcm_dir, imag_dcm_dir)
 
-    img = np.abs(ifield[:,:,:,-1])
-    target = load(target_nii)
-    last_echo = Nifti1Image(img,affine=target.affine)
-    save(last_echo,Path(out_dir) / out_file)
+    # NOTE: we don't need this now but just for reference...
+    # sum of squares of the magnitude/echoes 
+    # (smoother/some data loss compared to last_echo)
+    # img=np.sqrt(np.sum((np.abs(ifield))**2, axis=3))
+
+    # get last echo of the magnitude of complex data/field map
+    img = np.abs(field_map[:,:,:,-1])
+    target = load(target_file)
+    last_echo = Nifti1Image(img, affine=target.affine)
+    save(last_echo, Path(out_dir) / out_file)
 
     return
+
+
 
