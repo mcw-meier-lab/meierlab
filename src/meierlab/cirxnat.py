@@ -27,21 +27,6 @@ class Cirxnat:
         self.session.auth = requests.auth.HTTPBasicAuth(self.user, self.password)
         self.session.proxies = self.proxy
 
-        """
-        req = requests.Request(
-            "POST",
-            self.address,
-            auth=self.session.auth,
-            headers={"Authorization": f"Basic {self.user} {self.password}"},
-        )
-        prepped = self.session.prepare_request(req)
-        print(
-            f"{prepped.method} {prepped.url}\n",
-            "\r\n".join("{}: {}".format(k, v) for k, v in prepped.headers.items()),
-            prepped.body,
-        )
-        """
-
     # Getters
     def get_user(self):
         """Return XNAT user"""
