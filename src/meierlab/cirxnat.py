@@ -27,21 +27,6 @@ class Cirxnat:
         self.session.auth = requests.auth.HTTPBasicAuth(self.user, self.password)
         self.session.proxies = self.proxy
 
-        """
-        req = requests.Request(
-            "POST",
-            self.address,
-            auth=self.session.auth,
-            headers={"Authorization": f"Basic {self.user} {self.password}"},
-        )
-        prepped = self.session.prepare_request(req)
-        print(
-            f"{prepped.method} {prepped.url}\n",
-            "\r\n".join("{}: {}".format(k, v) for k, v in prepped.headers.items()),
-            prepped.body,
-        )
-        """
-
     # Getters
     def get_user(self):
         """Return XNAT user"""
@@ -480,10 +465,14 @@ class Cirxnat:
 
         return error
 
-    def get_project_dcm_params(self):
+    def get_project_dcm_params(self, scan_list=None):
         """Get a pandas DataFrame containing DICOM parameter information
         for all experiments in a project.
 
+        Parameters
+        ----------
+        scan_list : list
+            List of scan descriptions to get DICOM information for.
         Returns
         -------
         proj_df
@@ -496,7 +485,15 @@ class Cirxnat:
             scans = self.get_scans_dictionary(
                 exp["subject_label"], exp["experiment_label"]
             )
-            scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
+            if not scan_list:
+                scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
+            else:
+                scans_copy = scans.copy()
+                for scan_num, scan_desc in scans_copy.items():
+                    for s in scan_list:
+                        if s not in scan_desc:
+                            scans.pop(scan_num)
+                scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
 
             for scan, tag_vals in scans_dcm.items():
                 for tag, val in tag_vals.items():
