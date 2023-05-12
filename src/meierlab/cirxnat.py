@@ -29,26 +29,38 @@ class Cirxnat:
 
     # Getters
     def get_user(self):
-        """Return XNAT user"""
+        """Get XNAT user.
+        
+        Returns
+        -------
+        str
+            CIRXNAT user associated with current server.
+        """
         return self.user
 
     def get_project(self):
-        """Return XNAT project"""
+        """Get XNAT project.
+        
+        Returns
+        -------
+        str
+            CIRXNAT project associated with current server.
+        """
         return self.project
 
     def _remove_doubles(self, url):
-        """Remove double slashes for URL"""
+        """Helper function to remove double slashes for URL."""
         return url.replace("//data", "/data")
 
     def _get_base_url(self, ending=""):
-        """Provide base URL string for retrieving data"""
+        """Helper function to provide base URL string for retrieving data."""
         base_url = (
             f"{self.address}/data/archive/projects/{self.project}/subjects{ending}"
         )
         return self._remove_doubles(base_url)
 
     def _get_dicom_url(self, ending=""):
-        """Provide base URL for retrieving DICOM data"""
+        """Helper function to provide base URL for retrieving DICOM data."""
         dicom_url = (
             f"{self.address}/REST/services/dicomdump?src=/archive/projects/"
             f"{self.project}{ending}"
@@ -56,7 +68,13 @@ class Cirxnat:
         return self._remove_doubles(dicom_url)
 
     def get_address(self):
-        """Return XNAT server address"""
+        """Get XNAT server address.
+        
+        Returns
+        -------
+        str
+            CIRXNAT address associated with current server.
+        """
         return self.address
 
     # Retrieval
@@ -70,7 +88,8 @@ class Cirxnat:
 
         Returns
         -------
-        Text string request result
+        str
+            Text string request result.
         """
         url = self._get_base_url()
         payload = {"format": mformat}
@@ -78,17 +97,18 @@ class Cirxnat:
         return response.text.rstrip()
 
     def get_subjects_json(self):
-        """Get the subject list JSON and split it up into individual subjects
+        """Get the subject list JSON and split it up into individual subjects.
 
         Returns
         -------
-        JSON object with subjects.
+        list
+            List of JSON dictionaries with subjects.
         """
         response = self.get_subjects("json")
         return (json.loads(response))["ResultSet"]["Result"]
 
     def get_experiments(self, subject_id, mformat="csv"):
-        """Get experiments associated with a subject
+        """Get experiments associated with a subject.
 
         Parameters
         ----------
@@ -99,7 +119,8 @@ class Cirxnat:
 
         Returns
         -------
-        Text string request result.
+        str
+            Text string request result.
         """
         url = self._get_base_url(f"/{subject_id}/experiments")
         payload = {"format": mformat}
@@ -107,7 +128,7 @@ class Cirxnat:
         return response.text.rstrip()
 
     def get_experiments_json(self, subject_id):
-        """Get the experiments JSON and split them up
+        """Get the experiments JSON and split them up.
 
         Parameters
         ----------
@@ -116,7 +137,8 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object with subject's experiments.
+        list
+            List of JSON dictionaries with subject's experiments.
         """
         response = self.get_experiments(subject_id, "json")
         return (json.loads(response))["ResultSet"]["Result"]
@@ -133,7 +155,8 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object with note from XNAT.
+        str
+            JSON string with note from XNAT.
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}")
         payload = {"format": "json"}
@@ -146,20 +169,21 @@ class Cirxnat:
             return ""
 
     def get_scans(self, subject_id, experiment_id, mformat="csv"):
-        """Get scans associated with a subject's experiment
+        """Get scans associated with a subject's experiment.
 
         Parameters
         ----------
         subject_id : str
-            Subject label from XNAT
+            Subject label from XNAT.
         experiment_id : str
-            Experiment label from XNAT
+            Experiment label from XNAT.
         mformat : str
             Output format. Default: 'csv'.
 
         Returns
         -------
-        Text string request result.
+        str
+            Text string request result.
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": mformat}
@@ -167,7 +191,7 @@ class Cirxnat:
         return response.text.rstrip()
 
     def get_scans_json(self, subject_id, experiment_id):
-        """Get a subject's experiment's scans in JSON format
+        """Get a subject's experiment's scans in JSON format.
 
         Parameters
         ----------
@@ -178,24 +202,26 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object with scans from experiment.
+        list
+            List of scans from experiment.
         """
         response = self.get_scans(subject_id, experiment_id, "json")
         return (json.loads(response))["ResultSet"]["Result"]
 
     def get_scans_dictionary(self, subject_id, experiment_id):
-        """Get a dictionary of scan IDs and their descriptions from an experiment
+        """Get a dictionary of scan IDs and their descriptions from an experiment.
 
         Parameters
         ----------
         subject_id : str
-            Subject label from XNAT
+            Subject label from XNAT.
         experiment_id : str
-            Experiment label from XNAT
+            Experiment label from XNAT.
 
         Returns
         -------
-        Dictionary of scan ID: series_description
+        dict
+            Dictionary of scan ID: series_description.
         """
         all_scans = self.get_scans_json(subject_id, experiment_id)
         scans_dictionary = {}
@@ -204,11 +230,12 @@ class Cirxnat:
         return scans_dictionary
 
     def print_all_experiments(self):
-        """Get a dictionary of subjects with experiment data.
+        """Get a list of experiment dictionaries with experiment data.
 
         Returns
         -------
-        List of experiment dictionaries with label, IDs, upload date, XNAT URI.
+        list
+            List of experiment dictionaries with labels, IDs, upload date, XNAT URI.
         """
         experiment_list = []
         # Get the subject list and split it up into individual subjects
@@ -251,7 +278,7 @@ class Cirxnat:
         return value
 
     def get_dicom_header(self, experiment_id, scan_num):
-        """Get a JSON formatted subject experiment scan DICOM header
+        """Get a JSON formatted subject experiment scan DICOM header.
 
         Parameters
         ----------
@@ -262,7 +289,8 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object containing scan header information.
+        list
+            JSON dictionary containing scan header information.
         """
         url = self._get_dicom_url(f"/experiments/{experiment_id}/scans/{scan_num}")
         response = self.session.get(url).text.rstrip()
@@ -270,7 +298,7 @@ class Cirxnat:
 
     def get_dicom_tag(self, subject_id, experiment_id, scan_num, tag_id):
         """Pass in the DICOM tag id as an 8 digit string,
-        or a valid text string, to get back the value
+        or a valid text string, to get back the value.
 
         Parameters
         ----------
@@ -285,7 +313,8 @@ class Cirxnat:
 
         Returns
         -------
-        JSON object with tag information.
+        str 
+            JSON string with tag information.
         """
         url = self._get_dicom_url(
             f"/subjects/{subject_id}/experiments/{experiment_id}/scans/{scan_num}"
@@ -296,7 +325,29 @@ class Cirxnat:
 
 
     def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
-        """Get common dicom tag info
+        """Get common dicom tag info. Defaults include:
+            "(0008,0008)": "image_type",
+            "(0008,0070)": "manufacturer",
+            "(0008,1090)": "scanner",
+            "(0018,0050)": "slice_thickness",
+            "(0018,0080)": "repetition_time",
+            "(0018,0081)": "echo_time",
+            "(0018,0082)": "inversion_time",
+            "(0018,0083)": "num_avgs",
+            "(0018,0087)": "field_strength",
+            "(0018,0091)": "echo_train_len",
+            "(0018,0093)": "percent_sampling",
+            "(0018,0094)": "percent_phase_fov",
+            "(0018,0095)": "pixel_bandwidth",
+            "(0018,1020)": "software_version",
+            "(0018,1250)": "coil",
+            "(0018,1310)": "acq_matrix",
+            "(0018,1314)": "flip_angle",
+            "(0018,1316)": "sar",
+            "(0028,0010)": "rows",
+            "(0028,0011)": "cols",
+            "(0028,0030)": "pixel_spacing",
+            "(0029,1020)": "channels",
 
         Parameters
         ----------
@@ -304,10 +355,13 @@ class Cirxnat:
             Experiment label from XNAT.
         scans_list : list
             List of scans to get data from.
+        extra_tags : dict, optional
+            Dictionary of tag (str) : label (str) to add to defaults.
 
         Returns
         -------
-        Dictionary of scans DICOM tags: values.
+        dict
+            Dictionary of scans DICOM tags: values.
         """
         tags = {
             "(0008,0008)": "image_type",
@@ -361,7 +415,7 @@ class Cirxnat:
         return scans_dcm
 
     def get_scans_usability(self, subject_id, experiment_id):
-        """Get a dictionary of subject scans and their usability
+        """Get a dictionary of subject scans and their usability.
 
         Parameters
         ----------
@@ -372,7 +426,8 @@ class Cirxnat:
 
         Returns
         -------
-        Scan usability dictionary with ID, series_description, and QA note.
+        dict
+            Scan usability dictionary with ID, series_description, and QA note.
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": "json"}
@@ -390,7 +445,7 @@ class Cirxnat:
         return scans_usability
 
     def zip_scans_to_file(self, subject_id, experiment_id, out_file, scan_list="ALL"):
-        """Returns a zip file with all of the resource files
+        """Returns a zip file with all of the resource files.
 
         Parameters
         ----------
@@ -400,7 +455,7 @@ class Cirxnat:
             Experiment label from XNAT.
         out_file : str
             Path to output file
-        scan_list : list
+        scan_list : list, optional
             List of scans to download. Default: 'ALL'
 
         """
@@ -421,7 +476,7 @@ class Cirxnat:
         return
 
     def _create_scan_ids(self, subject_id, experiment_id, scan_desc_list):
-        """Converts a scan description to a scanID."""
+        """Helper function to convert a scan description to a scanID."""
         scan_ids = []
         scan_dict = self.get_scans_json(subject_id, experiment_id)
         # get the ID where series description matches scan desc
@@ -433,7 +488,7 @@ class Cirxnat:
     def zip_scan_descriptions_to_file(
         self, subject_id, experiment_id, descriptions, out_file
     ):
-        """Zip scans by series description
+        """Zip scans by series description.
 
         Parameters
         ----------
@@ -448,7 +503,8 @@ class Cirxnat:
 
         Returns
         -------
-        0 if files downloaded successfully, 1 if no matching scans were found.
+        int
+            0 if files downloaded successfully, 1 if no matching scans were found.
         """
         id_string = self._create_scan_ids(subject_id, experiment_id, descriptions)
 
@@ -471,12 +527,13 @@ class Cirxnat:
 
         Parameters
         ----------
-        scan_list : list
-            List of scan descriptions to get DICOM information for.
+        scan_list : list, optional
+            List of scan descriptions to get DICOM information for. Default: all scans.
+
         Returns
         -------
-        proj_df
-            `pandas.DataFrame()` containing DICOM parameter information
+        :class:`~pandas.DataFrame`
+            DataFrame containing DICOM parameter information.
         """
         proj_df = pd.DataFrame()
         experiments = self.print_all_experiments()
@@ -488,12 +545,13 @@ class Cirxnat:
             if not scan_list:
                 scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
             else:
-                scans_copy = scans.copy()
-                for scan_num, scan_desc in scans_copy.items():
+                new_scans = {}
+                for scan_num, scan_desc in scans.items():
                     for s in scan_list:
-                        if s not in scan_desc:
-                            scans.pop(scan_num)
-                scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
+                        if s in scan_desc:
+                            new_scans[scan_num] = scan_desc
+
+                scans_dcm = self.get_dicom_tags(exp["experiment_label"], new_scans.keys())
 
             for scan, tag_vals in scans_dcm.items():
                 for tag, val in tag_vals.items():
