@@ -8,6 +8,22 @@ from base64 import b64encode
 
 def gen_figs(outlier_df,x_cols,
              y_cols=[('pos_count','neg_count'),('pos_pct','neg_pct')]):
+    """Generate plotly figures from an outlier dataframe.
+
+    Parameters
+    ----------
+    outlier_df : :class:`~pandas.DataFrame`
+        Dataframe with outlier info (from meierlab.outliers)
+    x_cols : list
+        x-axis columns to use.
+    y_cols : list, optional
+        y-axis columns to use, by default [('pos_count','neg_count'),('pos_pct','neg_pct')]
+
+    Returns
+    -------
+    list
+        List of :class:`~plotly.graph_objects.Figure` violin plots.
+    """
     figs = list(zip(x_cols, y_cols))
     out_figs = []
     for x,y in figs:
@@ -39,6 +55,20 @@ def gen_figs(outlier_df,x_cols,
     return out_figs
 
 def get_app(figures,app_type=None):
+    """Get a dash app to view data.
+
+    Parameters
+    ----------
+    figures : list
+        List of :class:`~plotly.graph_objects` figures to view.
+    app_type : str, optional
+        Use "jupyter" if viewing via Jupyter Notebook/Lab, by default None
+
+    Returns
+    -------
+    :class:`~dash.Dash` or :class:`~jupyter_dash.JupyterDash`
+        Dash HTML app with figures to view. Run via `app.run()` and open a browser with the local host address (or view through Jupyter).
+    """
     if app_type == "jupyter":
         from jupyter_dash import JupyterDash
         app = JupyterDash(__name__)

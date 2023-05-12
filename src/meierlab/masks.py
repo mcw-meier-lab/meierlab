@@ -7,7 +7,7 @@ def create_avg_mask(nii_images):
 
    Parameters
    ----------
-   nii_images : :obj:`list`
+   nii_images : list
       List of image (:class:`~nibabel.nifti1.Nifti1Image`) or paths to files
 
    Returns
