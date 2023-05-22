@@ -22,6 +22,7 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 autoapi_dirs = ["../src"]
+autoapi_type = 'python'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -34,3 +35,4 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+source_suffix = ['.md']
