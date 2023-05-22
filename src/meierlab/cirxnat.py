@@ -365,8 +365,12 @@ class Cirxnat:
         """
         tags = {
             "(0008,0008)": "image_type",
+            "(0008,0022)": "scan_date",
             "(0008,0070)": "manufacturer",
+            "(0008,103E)": "scan_desc",
             "(0008,1090)": "scanner",
+            "(0010,0010)": "subject_id",
+            "(0010,0020)": "session_id",
             "(0018,0050)": "slice_thickness",
             "(0018,0080)": "repetition_time",
             "(0018,0081)": "echo_time",
@@ -414,8 +418,8 @@ class Cirxnat:
 
         return scans_dcm
 
-    def get_scans_usability(self, subject_id, experiment_id):
-        """Get a dictionary of subject scans and their usability.
+    def get_scans_usability(self, subject_id, experiment_id, scan_list=[]):
+        """Get a dictionary of subject scans and their usability
 
         Parameters
         ----------
@@ -423,6 +427,8 @@ class Cirxnat:
             Subject label from XNAT.
         experiment_id : str
             Experiment label from XNAT.
+        scan_list : list, optional
+            List of scan descriptions to use.
 
         Returns
         -------
@@ -436,11 +442,20 @@ class Cirxnat:
         all_scans = (json.loads(response))["ResultSet"]["Result"]
         scans_usability = {}
         for scan in all_scans:
-            scans_usability[scan["ID"]] = [
-                str(scan["series_description"]),
-                str(scan["quality"]),
-                str(scan["note"]).replace(",", ";"),
-            ]
+            if not scan_list:
+                scans_usability[scan["ID"]] = [
+                    str(scan["series_description"]),
+                    str(scan["quality"]),
+                    str(scan["note"]).replace(",", ";"),
+                ]
+            else:
+                for s in scan_list:
+                    if s in scan["series_description"]:
+                        scans_usability[scan["ID"]] = [
+                            str(scan["series_description"]),
+                            str(scan["quality"]),
+                            str(scan["note"]).replace(",", ";"),
+                        ]
 
         return scans_usability
 
@@ -521,7 +536,7 @@ class Cirxnat:
 
         return error
 
-    def get_project_dcm_params(self, scan_list=None):
+    def get_project_dcm_params(self,scan_list=[],extra_tags={}):
         """Get a pandas DataFrame containing DICOM parameter information
         for all experiments in a project.
 
@@ -542,18 +557,31 @@ class Cirxnat:
             scans = self.get_scans_dictionary(
                 exp["subject_label"], exp["experiment_label"]
             )
+            #scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys(), extra_tags)
             if not scan_list:
-                scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys())
+                scans_dcm = self.get_dicom_tags(exp["experiment_label"], scans.keys(),extra_tags)
+                usability = self.get_scans_usability(
+                    exp["subject_label"],exp["experiment_label"]
+                )
             else:
                 new_scans = {}
+                new_use = {}
                 for scan_num, scan_desc in scans.items():
                     for s in scan_list:
                         if s in scan_desc:
                             new_scans[scan_num] = scan_desc
+                            new_use[scan_num] = scan_desc
 
-                scans_dcm = self.get_dicom_tags(exp["experiment_label"], new_scans.keys())
+                scans_dcm = self.get_dicom_tags(exp["experiment_label"], new_scans.keys(),extra_tags)
+                usability = self.get_scans_usability(
+                    exp["subject_label"],exp["experiment_label"], new_use.values()
+                )
 
             for scan, tag_vals in scans_dcm.items():
+                for tag, val in tag_vals.items():
+                    column = f"{scans[scan]}_{tag}"
+                    exp_scans[column] = val
+            for scan, tag_vals in usability.items():
                 for tag, val in tag_vals.items():
                     column = f"{scans[scan]}_{tag}"
                     exp_scans[column] = val

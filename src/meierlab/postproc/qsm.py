@@ -75,19 +75,27 @@ def load_dcm(real_dcm_dir, imag_dcm_dir):
         
     return field_map, scan_meta
 
-def get_last_echo(real_dcm_dir, imag_dcm_dir, target_file, out_dir, out_file):
+def get_mag_data(real_dcm_dir, imag_dcm_dir, target_file, out_dir, out_file=None):
     field_map, _ = load_dcm(real_dcm_dir, imag_dcm_dir)
 
-    # NOTE: we don't need this now but just for reference...
-    # sum of squares of the magnitude/echoes 
-    # (smoother/some data loss compared to last_echo)
-    # img=np.sqrt(np.sum((np.abs(ifield))**2, axis=3))
+    target = load(target_file)
+    out_file = out_file if out_file != None else ''
+
+    # magnitude
+    img = np.abs(field_map)
+    mag = Nifti1Image(img, affine=target.affine)
+    save(mag, Path(out_dir) / f"{out_file}magnitude.nii.gz")
 
     # get last echo of the magnitude of complex data/field map
     img = np.abs(field_map[:,:,:,-1])
-    target = load(target_file)
     last_echo = Nifti1Image(img, affine=target.affine)
-    save(last_echo, Path(out_dir) / out_file)
+    save(last_echo, Path(out_dir) / f"{out_file}lastecho.nii.gz")
+
+    # sum of squares of the magnitude/echoes 
+    # (smoother/some data loss compared to last_echo)
+    img = np.sqrt(np.sum((np.abs(field_map))**2, axis=3))
+    ss_mag = Nifti1Image(img, affine=target.affine)
+    save(ss_mag, Path(out_dir) / f"{out_file}magnitudeSS.nii.gz")
 
     return
 
