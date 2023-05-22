@@ -4,7 +4,7 @@ import csv
 import networkx as nx
 import pandas as pd
 import numpy as np
-from itertools import combinations_with_replacement, combinations
+from itertools import combinations_with_replacement, combinations, product
 
 # with help from https://programminghistorian.org/en/lessons/exploring-and-analyzing-network-data-with-python
 def gen_base_graph_from_atlas(atlas, atlas_delim=","):
@@ -139,7 +139,7 @@ def gen_subnetwork_list(G, subnetwork_label="RSN"):
     for node in G.nodes():
         subnetwork_list.append(G.nodes[node][subnetwork_label])
 
-    subnetwork_list = list(set(subnetwork_list))
+    subnetwork_list = sorted(list(set(subnetwork_list)))
 
     return subnetwork_list
 
@@ -174,7 +174,7 @@ def gen_subnetwork_subgraphs(G, subnetwork_list, subnetwork_label="RSN"):
     return subgraphs
 
 
-def gen_subnetwork_pairs(subgraph_list, subnetwork_label="RSN"):
+def gen_subnetwork_pairs(G, subgraph_list, subnetwork_label="RSN"):
     """Generate pairs of networks from graph `G` to explore and compare.
 
     Parameters
@@ -195,7 +195,11 @@ def gen_subnetwork_pairs(subgraph_list, subnetwork_label="RSN"):
     # join subgraph pairs and label according to subnetwork
     paired_subgraphs = {}
     for net_1, net_2 in network_pairs:
-        combined = nx.compose(net_1,net_2)
+        nodes_1 = list(net_1.nodes())
+        nodes_2 = list(net_2.nodes())
+        edge_list = list(product(nodes_1,nodes_2))
+
+        combined = G.edge_subgraph(edge_list)
         label_1 = list(nx.get_node_attributes(net_1,subnetwork_label).values())[0]
         label_2 = list(nx.get_node_attributes(net_2,subnetwork_label).values())[0]
         paired_subgraphs[(label_1,label_2)] = combined
@@ -219,7 +223,9 @@ def get_within_network_connectivity(subgraph, edge_attr="weight"):
         Average of weighted edges in `subgraph`.
     """
     # just need the weight values, exclude nans in the mean calculation
-    edge_weights = [d[edge_attr] for (_,_,d) in subgraph.edges(data=True)]
+    sg = subgraph.copy()
+    sg.remove_edges_from(nx.selfloop_edges(sg))
+    edge_weights = [d[edge_attr] for (_,_,d) in sg.edges(data=True)]
     avg = np.mean(edge_weights)
 
     return avg
@@ -242,8 +248,10 @@ def get_between_network_connectivity(subgraphs, edge_attr="weight"):
     """
     # like within_connectivity, but across all pairs of networks
     averages = {}
-    for net_pair, vals in subgraphs.items():
-        edge_weights = [d[edge_attr] for (_,_,d) in vals.edges(data=True)]
+    for net_pair, subgraph in subgraphs.items():
+        sg = subgraph.copy()
+        sg.remove_edges_from(nx.selfloop_edges(sg))
+        edge_weights = [d[edge_attr] for (_,_,d) in sg.edges(data=True)]
         avg = np.mean(edge_weights)
         averages[net_pair] = avg
 

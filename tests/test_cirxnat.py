@@ -1,19 +1,18 @@
 import pytest
 import os
 import pandas as pd
-import meierlab.config as config
 
 
 def test_get_user(example_server):
-    assert example_server.get_user() == config.user
+    assert example_server.get_user() == "lespana"
 
 
 def test_get_project(example_server):
-    assert example_server.get_project() == config.project
+    assert example_server.get_project() == "DEVXNAT"
 
 
 def test_get_address(example_server):
-    assert example_server.get_address() == config.address
+    assert example_server.get_address() == "https://devxnat.rcc.mcw.edu"
 
 
 def test_get_subjects_json(example_server):
