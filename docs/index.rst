@@ -7,15 +7,21 @@ Welcome to the MCW Meier Lab documentation!
 ===========================================
 
 .. container:: index-paragraph
+
    The **meierlab** project provides functional tools to aid 
    lab members in downloading, processing, visualizing, 
    and analyzing imaging data.
 
+.. note::
+
+   This project is under active development and is intended
+   for academic research only.
+
 
 .. grid::
 
-   .. grid-item-card:: :fas: `rocket` Quickstart
-      :link: quickstart
+   .. grid-item-card:: :fas:`rocket` Quickstart
+      :link: readme
       :link-type: ref
       :columns: 12 12 4 4
       :class-card: sd-shadow-md
@@ -50,23 +56,24 @@ Featured examples
 -----------------
 **In progress**
 
+
 .. toctree::
    :hidden:
    :includehidden:
    :titlesonly:
 
+   readme.rst
    auto_examples/index.rst
    user_guide.rst
    modules/index.rst
-   glossary.rst
 
 .. toctree::
    :hidden:
    :caption: Development
 
-   changes/whats_new.rst
+   whats_new.rst
    authors.rst
+   license.rst
+   contrib.rst
+   conduct.rst
    Github Repository <https://github.com/mcw-meier-lab/meierlab>
-
-
-The meierlab project is developed and used for academic research only.
