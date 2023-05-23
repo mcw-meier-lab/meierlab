@@ -5,7 +5,6 @@
 import os
 import re
 import sys
-import sphinx
 
 sys.path.insert(0, os.path.abspath("sphinxext"))
 from github_link import make_linkcode_resolve
@@ -30,9 +29,9 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
     "sphinx.ext.linkcode",
-    "sphinx_design",
     "sphinx.ext.extlinks",
     "sphinx.ext.todo",
+    "sphinx_design",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
     "myst_parser",
@@ -63,15 +62,18 @@ intersphinx_disabled_domains = ["std"]
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown"
+}
 
 plot_gallery = True
 
-# Latest release version
-latest_release = re.match(
-    r"v?([0-9]+.[0-9]+.[0-9]+).*",
-    os.popen("git describe --tags").read().strip(),
-).groups()[0]
+html_css_files = [
+        (
+            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        ),
+]
 
 # The full current version, including alpha/beta/rc tags.
 import meierlab
@@ -98,7 +100,7 @@ sphinx_gallery_conf = {
 # The following is used by sphinx.ext.linkcode to provide links to github
 linkcode_resolve = make_linkcode_resolve(
     "meierlab",
-    "https://github.com/mcw-meier-lab/meierlab",
+    "https://github.com/mcw-meier-lab/meierlab"
     "meierlab/blob/{revision}/"
-    "{package}/{path}#L{lineno}",
+    "{package}/{path}#L{lineno}"
 )
