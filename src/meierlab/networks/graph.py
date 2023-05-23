@@ -159,7 +159,7 @@ def gen_subnetwork_subgraphs(G, subnetwork_list, subnetwork_label="RSN"):
     Returns
     -------
     list
-        A list of subgraphs: :class:`networkx.Graph.subgraph` with each subgraph corresponding to nodes in each network of `subnetwork_list`.
+        A list of subgraphs: :class:`networkx.Graph` with each subgraph corresponding to nodes in each network of `subnetwork_list`.
     """
     # for each subnetwork, add node to subgraph if it belongs to the subnetwork
     subgraphs = []
