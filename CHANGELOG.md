@@ -9,6 +9,7 @@
 
 -   Refactored code to use python `requests` library.
 -   Updated DICOM parameter tools to read Siemens shadow headers.
+
 # Changelog
 
 <!--next-version-placeholder-->
