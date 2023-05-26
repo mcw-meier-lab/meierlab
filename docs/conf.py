@@ -67,7 +67,7 @@ source_suffix = {
     ".md": "markdown"
 }
 
-plot_gallery = True
+plot_gallery = "True"
 
 html_css_files = [
         (
@@ -101,6 +101,6 @@ sphinx_gallery_conf = {
 linkcode_resolve = make_linkcode_resolve(
     "meierlab",
     "https://github.com/mcw-meier-lab/meierlab"
-    "meierlab/blob/{revision}/"
+    "/blob/{revision}/src/"
     "{package}/{path}#L{lineno}"
 )

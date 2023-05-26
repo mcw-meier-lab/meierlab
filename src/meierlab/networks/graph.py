@@ -21,6 +21,14 @@ def gen_base_graph_from_atlas(atlas, atlas_delim=","):
     -------
     :class:`networkx.Graph`
         A networkx graph containing nodes with labels from the `atlas` given. Edges are the ((n*n-1)/2) + n combination of node pairs, which includes self-loop identity pairs.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> G.nodes()
+    NodeView(('LH_Vis_1', 'LH_Vis_2', 'LH_Vis_3', 'LH_Vis_4', 'LH_Vis_5', 'RH_Vis_1', 'RH_Vis_2', 'RH_Vis_3', 'RH_Vis_4', 'RH_Vis_5', 'LH_Default_Temp_1', 'LH_Default_Temp_2', 'LH_Default_Temp_3', 'LH_Default_Temp_4', 'LH_Default_Temp_5', 'LH_Default_Temp_6', 'LH_Default_Temp_7', 'LH_Default_Temp_8', 'LH_Default_Temp_9', 'LH_Default_Temp_10', 'RH_Default_Temp_1', 'RH_Default_Temp_2', 'RH_Default_Temp_3', 'RH_Default_Temp_4', 'RH_Default_Temp_5', 'RH_Default_Temp_6', 'RH_Default_Temp_7', 'RH_Default_Temp_8'))
     """
     G = nx.Graph()
 
@@ -56,15 +64,13 @@ def gen_base_graph_from_atlas(atlas, atlas_delim=","):
     return G
 
 
-def gen_graph_from_matrix(G, atlas, matrix_file, atlas_delim=",", matrix_delim="\t"):
+def gen_graph_from_matrix(atlas, matrix_file, atlas_delim=",", matrix_delim="\t"):
     """Generate a (weighted, undirected) graph from a matrix file.
 
     Parameters
     ----------
-    G : :class:`networkx.Graph`
-        A base graph with node and edge information.
     atlas : str or file path
-        Atlas parcellation used to generate `G`.
+        Atlas parcellation used to generate the main graph.
     matrix_file : str or file path
         A text file containing edge weight information (e.g., a correlation matrix).
     atlas_delim : str, optional
@@ -76,7 +82,19 @@ def gen_graph_from_matrix(G, atlas, matrix_file, atlas_delim=",", matrix_delim="
     -------
     :class:`networkx.Graph`
         A graph with additional edge weight attributes.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> edge_weights = [d[edge_attr] for (_,_,d) in g.edges(data=True)] 
+    >>> edge_weights[0:10]
+    [1.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
     """
+    G = gen_base_graph_from_atlas(atlas)
+
     # read in the matrix and atlas (for ROI labels)
     corr_df = pd.read_csv(matrix_file, delimiter=matrix_delim,header=None)
     atlas_df = pd.read_csv(atlas, delimiter=atlas_delim)
@@ -106,6 +124,18 @@ def gen_basic_metrics(G):
     -------
     :class:`networkx.Graph`
         Graph with 'degree', 'betweenness', and 'eigenvector' centrality attributes added to nodes.
+
+    Examples
+    --------
+    >>> import networkx as nx
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> g = graph.gen_basic_metrics(g)
+    >>> eigenvectors = nx.get_node_attributes(g,'eigenvector')
+    >>> print(eigenvectors['RH_Default_Temp_8'])
+    0.1889822365046136
     """
     degree_dict = dict(G.degree(G.nodes()))
     nx.set_node_attributes(G, degree_dict, 'degree')
@@ -133,6 +163,15 @@ def gen_subnetwork_list(G, subnetwork_label="RSN"):
     -------
     list
         A list of 'subnetworks' that nodes in `G` belong to.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv' 
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> rsn_list = graph.gen_subnetwork_list(G)
+    >>> print(rsn_list)
+    ['DMN','Visual']
     """
     # use the labels from the graph to generate list of (unique) subnetworks
     subnetwork_list = []
@@ -160,6 +199,17 @@ def gen_subnetwork_subgraphs(G, subnetwork_list, subnetwork_label="RSN"):
     -------
     list
         A list of subgraphs: :class:`networkx.Graph` with each subgraph corresponding to nodes in each network of `subnetwork_list`.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> rsn_list = graph.gen_subnetwork_list(g)
+    >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
+    >>> subgraphs[0].nodes()
+    NodeView(('LH_Default_Temp_1', 'LH_Default_Temp_2', 'LH_Default_Temp_3', 'LH_Default_Temp_4', 'LH_Default_Temp_5', 'LH_Default_Temp_6', 'LH_Default_Temp_7', 'LH_Default_Temp_8', 'LH_Default_Temp_9', 'LH_Default_Temp_10', 'RH_Default_Temp_1', 'RH_Default_Temp_2', 'RH_Default_Temp_3', 'RH_Default_Temp_4', 'RH_Default_Temp_5', 'RH_Default_Temp_6', 'RH_Default_Temp_7', 'RH_Default_Temp_8'))
     """
     # for each subnetwork, add node to subgraph if it belongs to the subnetwork
     subgraphs = []
@@ -188,6 +238,18 @@ def gen_subnetwork_pairs(G, subgraph_list, subnetwork_label="RSN"):
     -------
     dict
         A dictionary with keys as pairs of subnetworks (e.g., DMN-VIS) and values as a subgraph with nodes where edges connect nodes from both subnetworks.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> rsn_list = graph.gen_subnetwork_list(g)
+    >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
+    >>> rsn_pairs = graph.gen_subnetwork_pairs(g, subgraphs)
+    >>> rsn_pairs
+    {('DMN', 'Visual'): <networkx.classes.graph.Graph at 0x120960460>}
     """
     # get all pairs of subnetworks (excluding identity)
     network_pairs = list(combinations(subgraph_list,2))
@@ -221,6 +283,18 @@ def get_within_network_connectivity(subgraph, edge_attr="weight"):
     -------
     :class:`numpy.float64`
         Average of weighted edges in `subgraph`.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> rsn_list = graph.gen_subnetwork_list(g)
+    >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list) 
+    >>> avg = graph.get_within_network_connectivity(subgraphs[0])
+    >>> avg
+    0.39999999999999997
     """
     # just need the weight values, exclude nans in the mean calculation
     sg = subgraph.copy()
@@ -245,6 +319,19 @@ def get_between_network_connectivity(subgraphs, edge_attr="weight"):
     -------
     dict
         Dictionary of network pairs and their average connectivity.
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> rsn_list = graph.gen_subnetwork_list(g)
+    >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
+    >>> rsn_pairs = graph.gen_subnetwork_pairs(g, subgraphs)
+    >>> averages = graph.get_between_network_connectivity(rsn_pairs)
+    >>> averages
+    {('DMN', 'Visual'): 0.5}
     """
     # like within_connectivity, but across all pairs of networks
     averages = {}
