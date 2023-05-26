@@ -103,6 +103,22 @@ class Cirxnat:
         -------
         list
             List of JSON dictionaries with subjects.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> subjects = server.get_subjects_json()
+        >>> print(subjects[0])
+        {'insert_date': '2016-07-20 12:51:48.678',
+        'project': 'UWARC',
+        'ID': 'XNAT_S00071',
+        'label': '4_ASN_test_3D_TOF',
+        'insert_user': 'admin',
+        'URI': '/data/subjects/XNAT_S00071'}
         """
         response = self.get_subjects("json")
         return (json.loads(response))["ResultSet"]["Result"]
@@ -139,6 +155,24 @@ class Cirxnat:
         -------
         list
             List of JSON dictionaries with subject's experiments.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> experiments = server.get_experiments_json('4_ASN_test_3D_TOF')
+        >>> print(experiments[0])
+        {'date': '2014-10-28',
+        'xsiType': 'xnat:mrSessionData',
+        'xnat:subjectassessordata/id': 'XNAT_E00130',
+        'insert_date': '2016-07-20 13:07:19.808',
+        'project': 'UWARC',
+        'ID': 'XNAT_E00130',
+        'label': '4_ASN_test_3D_TOF_28_10_2014_1',
+        'URI': '/data/experiments/XNAT_E00130'}
         """
         response = self.get_experiments(subject_id, "json")
         return (json.loads(response))["ResultSet"]["Result"]
@@ -157,6 +191,17 @@ class Cirxnat:
         -------
         str
             JSON string with note from XNAT.
+        
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> note = server.get_experiment_note_json('4_QA_HUMAN','4_QA_HUMAN_11_11_2015_1')
+        >>> print(note['note'])
+        'Note:  There is nose wrap on all Sagittal Sequences.'
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}")
         payload = {"format": "json"}
@@ -204,6 +249,24 @@ class Cirxnat:
         -------
         list
             List of scans from experiment.
+                
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> scans = server.get_scans_json('4_QA_HUMAN','4_QA_HUMAN_11_11_2015_1')
+        >>> print(scans[0])
+        {'xsiType': 'xnat:mrScanData',
+        'xnat_imagescandata_id': '1423',
+        'note': '',
+        'series_description': '3Plane Loc SSFSE',
+        'ID': '1',
+        'type': '3Plane Loc SSFSE',
+        'URI': '/data/experiments/XNAT_E00131/scans/1',
+        'quality': 'usable'}
         """
         response = self.get_scans(subject_id, experiment_id, "json")
         return (json.loads(response))["ResultSet"]["Result"]
@@ -222,6 +285,20 @@ class Cirxnat:
         -------
         dict
             Dictionary of scan ID: series_description.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> scans = server.get_scans_dictionary('4_QA_HUMAN','4_QA_HUMAN_11_11_2015_1')
+        >>> print(scans)
+        {'1': '3Plane Loc SSFSE',
+        '2': '3Plane Loc SSFSE',
+        ...,
+        }
         """
         all_scans = self.get_scans_json(subject_id, experiment_id)
         scans_dictionary = {}
@@ -236,6 +313,17 @@ class Cirxnat:
         -------
         list
             List of experiment dictionaries with labels, IDs, upload date, XNAT URI.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> all_experiments = server.print_all_experiments()
+        >>> print(len(all_experiments))
+        595
         """
         experiment_list = []
         # Get the subject list and split it up into individual subjects
@@ -291,6 +379,21 @@ class Cirxnat:
         -------
         list
             JSON dictionary containing scan header information.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> hdr = server.get_dicom_header('4_ASN_test_3D_TOF_28_10_2014_1','1')
+        >>> print(hdr[0])
+        {'tag1': '(0002,0001)',
+        'vr': 'OB',
+        'value': '00\\01',
+        'tag2': '',
+        'desc': 'File Meta Information Version'}
         """
         url = self._get_dicom_url(f"/experiments/{experiment_id}/scans/{scan_num}")
         response = self.session.get(url).text.rstrip()
@@ -362,6 +465,17 @@ class Cirxnat:
         -------
         dict
             Dictionary of scans DICOM tags: values.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> tags = server.get_dicom_tags('4_ASN_test_3D_TOF_28_10_2014_1',[1])
+        >>> print(tags[1]['echo_time'])
+        '1.448'
         """
         tags = {
             "(0008,0008)": "image_type",
@@ -434,6 +548,17 @@ class Cirxnat:
         -------
         dict
             Scan usability dictionary with ID, series_description, and QA note.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> usability = server.get_scans_usability('4_ASN_test_3D_TOF','4_ASN_test_3D_TOF_28_10_2014_1',['2'])
+        >>> print(usability)
+        {'1': ['desc':'3Plane Loc  32ch', 'quality':'usable','note': '']}
         """
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": "json"}
@@ -443,19 +568,19 @@ class Cirxnat:
         scans_usability = {}
         for scan in all_scans:
             if not scan_list:
-                scans_usability[scan["ID"]] = [
-                    str(scan["series_description"]),
-                    str(scan["quality"]),
-                    str(scan["note"]).replace(",", ";"),
-                ]
+                scans_usability[scan["ID"]] = {
+                    "desc":str(scan["series_description"]),
+                    "quality":str(scan["quality"]),
+                    "note":str(scan["note"]).replace(",", ";"),
+                }
             else:
                 for s in scan_list:
                     if s in scan["series_description"]:
-                        scans_usability[scan["ID"]] = [
-                            str(scan["series_description"]),
-                            str(scan["quality"]),
-                            str(scan["note"]).replace(",", ";"),
-                        ]
+                        scans_usability[scan["ID"]] = {
+                            "desc":str(scan["series_description"]),
+                            "quality":str(scan["quality"]),
+                            "note":str(scan["note"]).replace(",", ";"),
+                        }
 
         return scans_usability
 
@@ -472,7 +597,6 @@ class Cirxnat:
             Path to output file
         scan_list : list, optional
             List of scans to download. Default: 'ALL'
-
         """
         url = self._get_base_url(
             f"/{subject_id}/experiments/{experiment_id}/scans/{scan_list}/files"
@@ -520,6 +644,15 @@ class Cirxnat:
         -------
         int
             0 if files downloaded successfully, 1 if no matching scans were found.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass)
+        >>> err = server.zip_scans_descriptions_to_file('4_ASN_test_3D_TOF','4_ASN_test_3D_TOF_28_10_2014_1',['BRAVO'])
         """
         id_string = self._create_scan_ids(subject_id, experiment_id, descriptions)
 
@@ -549,6 +682,23 @@ class Cirxnat:
         -------
         :class:`~pandas.DataFrame`
             DataFrame containing DICOM parameter information.
+
+        Examples
+        --------
+        >>> import os
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,project='UWARC',user='lespana',password=cir1_pass) 
+        >>> dcm_params = server.get_project_dcm_params(scan_list=['BRAVO'])
+        >>> dcm_params.head()
+                                        Ax FSPGR BRAVO_channels  ... SB DTI MCW Axial R/L_note
+        4_ASN_test_3D_TOF_28_10_2014_1                           ...                       NaN
+        4_QA_HUMAN_11_11_2015_1                             NaN  ...                       NaN
+        4_WISC_IH_1746_20_11_2015_3                         NaN  ...                       NaN
+        4_WISC_IH_1746_03_05_2016_4                         NaN  ...                       NaN
+        4_WISC_IH_1556_24_11_2015_1                         NaN  ...                       NaN
+        [5 rows x 79 columns]
         """
         proj_df = pd.DataFrame()
         experiments = self.print_all_experiments()

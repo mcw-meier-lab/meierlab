@@ -1,0 +1,11 @@
+.. currentmodule:: meierlab
+
+0.1.0
+=====
+
+**Released February 2023**
+
+Changelog
+---------
+
+First release of meierlab.

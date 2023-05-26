@@ -1,0 +1,18 @@
+.. currentmodule:: meierlab
+
+0.3.0dev
+========
+
+Changes
+-------
+
+- Reverting to .rst files for documentation.
+
+Additions
+---------
+
+- More documentation and examples.
+
+- Schaefer 400 parcel 7 network atlas and updated labels.
+
+- 2d/3d addition to connectome plots.

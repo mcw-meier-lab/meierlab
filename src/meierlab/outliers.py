@@ -9,7 +9,7 @@ from meierlab.masks import create_avg_mask
 
 
 def compute_sd_thresholds(mean, sd, threshold=3):
-    """Create Nifti images that are a certain standard deviation above and below the mean, as determined by the given threshold (default 3).
+    """Helper function to create Nifti images that are a certain standard deviation above and below the mean, as determined by the given threshold (default 3).
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ def compute_sd_thresholds(mean, sd, threshold=3):
         `thresh_above` corresponding to the data <threshold> SD above the mean.
         `thresh_below` corresponding to the data <threshold> SD below the mean.
         `upper_cap` containing a Nifti-like image at the upper limit of data.
-        `lower_cap` containing a Nifti-like image at the lower limit of dat.
+        `lower_cap` containing a Nifti-like image at the lower limit of data.
     """
     above_str = f"mean_img + {threshold} * sd_img"
     thresh_above = math_img(above_str,mean_img=mean,sd_img=sd)
@@ -106,6 +106,14 @@ def compute_outlier_values(nii_images, out_folder, save_m_sd=False, save_prefix=
     -------
     :class:`~pandas.DataFrame`
         A dataframe containing: subject, total voxels, positive outlier counts and percentages, negative outlier counts and percentages.
+
+    Examples
+    --------
+    >>> from meierlab import outliers
+    >>> nii_images = ['sub-001.nii.gz','sub-002.nii.gz','sub-003.nii.gz']
+    >>> out_folder = './outliers'
+    >>> outlier_df = compute_outlier_values(nii_images, out_folder, save_m_sd=True)
+    >>> outlier_df.to_csv(f'{out_folder}/outliers.csv',index=False)
     """
     out_df = pd.DataFrame(
         columns=["subject","total_voxels","pos_count",

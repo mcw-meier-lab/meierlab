@@ -1,6 +1,8 @@
 :orphan:
 
-# Examples
+Examples
+--------
+
 
 
 .. raw:: html
@@ -11,6 +13,81 @@
 .. raw:: html
 
     </div>
+
+=============================
+Downloading and checking data
+=============================
+
+See :ref:`cirxnat` for more details.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="See how to use download tools and verify the data.">
+
+.. only:: html
+
+  .. image:: /auto_examples/00_tutorials/images/thumb/sphx_glr_plot_downloads_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_00_tutorials_plot_downloads.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Basic Downloads</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+=============================
+Visualization of brain images
+=============================
+
+See :ref:`viz` for more details.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot the regions of a reference atlas or parcellation. Schaefer 2018, 400 Parcels, 7 Networks, ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_plotting/images/thumb/sphx_glr_plot_atlas_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_01_plotting_plot_atlas.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Basic Atlas plotting</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /auto_examples/00_tutorials/index.rst
+   /auto_examples/01_plotting/index.rst
 
 
 .. only:: html

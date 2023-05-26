@@ -117,9 +117,6 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
-
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -144,5 +141,17 @@ dmypy.json
 # xnat
 https*
 
-# secrets
-config.py
+# documentation
+docs/auto_examples/
+docs/generated/
+docs/modules/generated
+
+# examples
+rawdata
+sourcedata
+examples/**/*.pdf
+examples/**/results/
+examples/results/
+examples/*nii
+examples/*nii.gz
+examples/*.png

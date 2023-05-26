@@ -62,7 +62,7 @@ Featured examples
    :includehidden:
    :titlesonly:
 
-   readme.rst
+   quickstart.rst
    auto_examples/index.rst
    user_guide.rst
    modules/index.rst
@@ -71,9 +71,8 @@ Featured examples
    :hidden:
    :caption: Development
 
-   whats_new.rst
+   changes/whats_new.rst
    authors.rst
    license.rst
    contrib.rst
-   conduct.rst
    Github Repository <https://github.com/mcw-meier-lab/meierlab>

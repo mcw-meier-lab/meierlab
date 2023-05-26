@@ -36,12 +36,12 @@ def get_subgraph_coords(subgraph, atlas_coords):
         Atlas coordinates for the given `subgraph`.
     """
     idx_list = list(nx.get_node_attributes(subgraph,"index").values())
-    coords = atlas_coords[[int(idx) for idx in idx_list]]
+    coords = atlas_coords[[int(idx)-1 for idx in idx_list]]
 
     return coords
 
 
-def plot_connectome_from_graph(g, atlas_coords, threshold="80%"):
+def plot_connectome_from_graph(g, atlas_coords, threshold="80%", dim="2d"):
     """Plot full connectome from a graph `g`.
 
     Parameters
@@ -52,6 +52,8 @@ def plot_connectome_from_graph(g, atlas_coords, threshold="80%"):
         Nifti file of atlas/parcellation.
     threshold : str, optional
         Edge threshold for visualization, by default "80%".
+    dim : str, optional
+        View plot in 2d or 3d, by default "2d".
 
     Returns
     -------
@@ -60,12 +62,15 @@ def plot_connectome_from_graph(g, atlas_coords, threshold="80%"):
     """
     
     mtx = nx.convert_matrix.to_numpy_array(g)
-    view = plotting.plot_connectome(mtx,atlas_coords,threshold)
+    if dim == "2d":
+        view = plotting.plot_connectome(mtx,atlas_coords,edge_threshold=threshold)
+    else:
+        view = plotting.view_connectome(mtx,atlas_coords,edge_threshold=threshold)
 
     return view
 
 
-def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%"):
+def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%", dim="2d"):
     """Plot the connectome for a `subgraph`, e.g. plot only one subnetwork.
 
     Parameters
@@ -76,6 +81,8 @@ def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%"):
         Atlas coordinates.
     threshold : str, optional
         Edge threshold for viewing, by default "80%".
+    dim : str, optional
+        View plot in 2d or 3d, by default "2d".
 
     Returns
     -------
@@ -84,7 +91,11 @@ def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%"):
     """
     coords = get_subgraph_coords(subgraph, atlas_coords)
     mtx = nx.convert_matrix.to_numpy_array(subgraph)
-    view = plotting.view_connectome(mtx,coords,threshold)
+
+    if dim == "2d":
+        view = plotting.plot_connectome(mtx,coords,edge_threshold=threshold)
+    else:
+        view = plotting.view_connectome(mtx,coords,edge_threshold=threshold)
 
     return view
 
@@ -108,7 +119,7 @@ def plot_subgraph_nodes(subgraph, atlas_coords, size=10):
     """
     coords = get_subgraph_coords(subgraph, atlas_coords)
     colors = list(nx.get_node_attributes(subgraph,"color").values())
-    labels = list(nx.get_node_attributes(subgraph,"color").keys())
+    labels = list(nx.get_node_attributes(subgraph,"label").values())
     view = plotting.view_markers(coords, colors, size, labels)
 
     return view

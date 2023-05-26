@@ -1,3 +1,4 @@
+============
 Introduction
 ============
 
@@ -27,6 +28,7 @@ Python before, you may find it useful to explore some other
 tutorials and wikis before going through this guide:
 
 `general introduction about Python <http://www.learnpython.org/>`_
+
 `introduction to using Python for science <http://scipy-lectures.github.io/>`_ 
 
 .. note::
@@ -38,7 +40,7 @@ tutorials and wikis before going through this guide:
 First steps with ``meierlab``
 -----------------------------
 
-At this stage, you should have :ref:`installed <readme>` ``meierlab`` and 
+At this stage, you should have :ref:`installed <quickstart>` ``meierlab`` and 
 opened a Jupyter notebook or an IPython / Python session.  
 First, load ``meierlab`` with
 
