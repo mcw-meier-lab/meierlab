@@ -1,27 +1,27 @@
 import pytest
 import networkx as nx
-from pkg_resources import resource_filename as pkgrf
+from importlib import resources
 from meierlab.networks import graph as ng
 
 
 @pytest.fixture
 def atlas():
-    return pkgrf("tests/data/atlas.csv")
+    return resources.files("meierlab") / "../../tests/data/atlas.csv"
 
 
 @pytest.fixture
 def sub_file():
-    return pkgrf("tests/data/sub-atlas.tsv")
+    return resources.files("meierlab") / "../../tests/data/sub-atlas.tsv"
 
 
 @pytest.fixture
-def G():
+def G(atlas):
     return ng.gen_base_graph_from_atlas(atlas)
 
 
 @pytest.fixture
-def g():
-    return ng.gen_graph_from_matrix(G,atlas,sub_file)
+def g(atlas,sub_file):
+    return ng.gen_graph_from_matrix(atlas,sub_file)
 
 
 @pytest.fixture
@@ -30,11 +30,11 @@ def rsn_list():
 
 
 @pytest.fixture
-def subgraphs():
-    return ng.gen_subnetwork_subgraphs(G,rsn_list)
+def subgraphs(g,rsn_list):
+    return ng.gen_subnetwork_subgraphs(g,rsn_list)
 
 
-def test_gen_base_graph_from_atlas(atlas):
+def test_gen_base_graph_from_atlas(G):
     assert type(G) == nx.Graph
     assert list(G.nodes()) == [
         'LH_Vis_1',
@@ -86,7 +86,7 @@ def test_gen_subnetwork_list(G, rsn_list):
     assert ng.gen_subnetwork_list(G) == rsn_list
 
 
-def test_gen_subnetwork_subgraphs(G, rsn_list):
+def test_gen_subnetwork_subgraphs(G, rsn_list, subgraphs):
     assert len(ng.gen_subnetwork_subgraphs(G,rsn_list)) == 2
     assert type(subgraphs[0]) == nx.Graph
 
@@ -284,8 +284,8 @@ def test_get_within_network_connectivity(subgraphs):
     assert round(win,2) == 0.4
 
 
-def test_get_between_network_connectivity(G,subgraphs):
-    rsn_pairs = ng.gen_subnetwork_pairs(G,subgraphs)
+def test_get_between_network_connectivity(g,subgraphs):
+    rsn_pairs = ng.gen_subnetwork_pairs(g,subgraphs)
     btn = ng.get_between_network_connectivity(rsn_pairs)
     assert list(btn.keys()) == [('DMN', 'Visual')]
     assert list(btn.values()) == [0.5]

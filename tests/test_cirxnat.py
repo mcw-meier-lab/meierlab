@@ -2,60 +2,66 @@ import pytest
 import os
 import pandas as pd
 
-
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_user(example_server):
     assert example_server.get_user() == "lespana"
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_project(example_server):
-    assert example_server.get_project() == "DEVXNAT"
+    assert example_server.get_project() == "CIRXNAT2"
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_address(example_server):
-    assert example_server.get_address() == "https://devxnat.rcc.mcw.edu"
+    assert example_server.get_address() == "https://cirxnat2.rcc.mcw.edu"
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_subjects_json(example_server):
     assert example_server.get_subjects_json()[0] == {
-        "insert_date": "2021-03-18 11:36:15.236",
+        "insert_date": "2023-09-27 17:31:21.352",
         "project": "Sandbox",
-        "ID": "DEVX_S02749",
-        "label": "25A",
-        "insert_user": "bswearingen",
-        "URI": "/data/subjects/DEVX_S02749",
+        "ID": "CIRXNAT2_S11400",
+        "label": "subject0004",
+        "insert_user": "admin",
+        "URI": "/data/subjects/CIRXNAT2_S11400"
     }
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_experiments_json(example_server, example_subject_id):
     assert example_server.get_experiments_json(example_subject_id) == [
         {
-            "date": "2020-12-17",
+            "date": "2023-02-19",
             "xsiType": "xnat:mrSessionData",
-            "xnat:subjectassessordata/id": "DEVX_E07019",
-            "insert_date": "2021-03-18 11:33:11.835",
+            "xnat:subjectassessordata/id": "CIRXNAT2_E18718",
+            "insert_date": "2023-09-27 17:31:21.352",
             "project": "Sandbox",
-            "ID": "DEVX_E07019",
-            "label": "06_121720",
-            "URI": "/data/experiments/DEVX_E07019",
+            "ID": "CIRXNAT2_E18718",
+            "label": "exam0004",
+            "URI": "/data/experiments/CIRXNAT2_E18718"
         }
     ]
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_json(example_server, example_subject_id, example_experiment_id):
     assert example_server.get_scans_json(example_subject_id, example_experiment_id)[
         0
     ] == {
         "xsiType": "xnat:mrScanData",
-        "xnat_imagescandata_id": "92755",
+        "xnat_imagescandata_id": "236583",
         "note": "",
-        "series_description": "3 Plane Localizer",
-        "ID": "1",
-        "type": "3 Plane Localizer",
-        "URI": "/data/experiments/DEVX_E07019/scans/1",
-        "quality": "usable",
+        "series_description": "T1W",
+        "ID": "2",
+        "type": "T1W",
+        "URI": "/data/experiments/CIRXNAT2_E18718/scans/2",
+        "quality": "usable"
     }
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_dictionary(
     example_server,
     example_subject_id,
@@ -64,56 +70,35 @@ def test_get_scans_dictionary(
     assert example_server.get_scans_dictionary(
         example_subject_id, example_experiment_id
     ) == {
-        "1": "3 Plane Localizer",
-        "2": "3 Plane Localizer",
-        "3": "HighRes_3Dspgr_2Nex",
-        "4": "ZTE -Pseudo-CT",
-        "5": "WATER: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "6": "FOV_Check_P20_3Dspgr_R2_Mp1_ARC_HS",
-        "7": "WATER: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "8": "UlnarDev_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "9": "WATER: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "10": "WristFlex_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "11": "WATER: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "12": "Rotation_P20_3Dspgr_R2_Mp40_ARC_HS",
-        "500": "FAT: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "501": "InPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "502": "OutPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm",
-        "700": "FAT: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "701": "InPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "702": "OutPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS",
-        "900": "FAT: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "901": "InPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "902": "OutPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS",
-        "1100": "FAT: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "1101": "InPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
-        "1102": "OutPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS",
+        "2": "T1W",
+        "13": "ASL 1025PLD",
+        "14": "ManPreScan ASL 1525PLD",
+        "15": "ManPreScan ASL 2025PLD",
+        "16": "ManPreScan ASL 2525PLD",
+        "17": "ManPreScan ASL 3025PLD",
+        "1350": "CBF:Feb 16 2023 13-17-43 CST",
+        "1450": "CBF:Feb 16 2023 13-19-14 CST",
+        "1550": "CBF:Feb 16 2023 13-20-42 CST",
+        "1650": "CBF:Feb 16 2023 13-22-11 CST",
+        "1750": "CBF:Feb 16 2023 13-23-50 CST",
     }
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_print_all_experiments(example_server):
     assert example_server.print_all_experiments() == [
-        {
-            "experiment_label": "25A",
-            "experiment_id": "DEVX_E06530",
-            "subject_label": "25A",
-            "subject_id": "DEVX_S02749",
-            "date": "2018-07-19",
-            "insert_date": "2021-03-18 11:36:15.666",
-            "uri": "/data/experiments/DEVX_E06530",
-        },
-        {
-            "experiment_label": "06_121720",
-            "experiment_id": "DEVX_E07019",
-            "subject_label": "06",
-            "subject_id": "DEVX_S03114",
-            "date": "2020-12-17",
-            "insert_date": "2021-03-18 11:33:11.835",
-            "uri": "/data/experiments/DEVX_E07019",
-        },
-    ]
+    {
+        "experiment_label": "exam0004",
+        "experiment_id": "CIRXNAT2_E18718",
+        "subject_label": "subject0004",
+        "subject_id": "CIRXNAT2_S11400",
+        "date": "2023-02-19",
+        "insert_date": "2023-09-27 17:31:21.352",
+        "uri": "/data/experiments/CIRXNAT2_E18718" 
+    }]
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_dicom_header(
     example_server,
     example_experiment_id,
@@ -124,6 +109,7 @@ def test_get_dicom_header(
     )
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_dicom_tag(
     example_server,
     example_subject_id,
@@ -136,9 +122,9 @@ def test_get_dicom_tag(
         {
             "tag1": "(0018,0081)",
             "vr": "DS",
-            "value": "78.72",
+            "value": "2.008",
             "tag2": "",
-            "desc": "Echo Time",
+            "desc": "Echo Time"
         }
     ]
     # if tag retrieval fails
@@ -153,6 +139,7 @@ def test_get_dicom_tag(
     )
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_usability(
     example_server,
     example_subject_id,
@@ -161,33 +148,21 @@ def test_get_scans_usability(
     assert example_server.get_scans_usability(
         example_subject_id, example_experiment_id
     ) == {
-        "1": ["3 Plane Localizer", "usable", ""],
-        "2": ["3 Plane Localizer", "usable", ""],
-        "3": ["HighRes_3Dspgr_2Nex", "usable", ""],
-        "4": ["ZTE -Pseudo-CT", "usable", ""],
-        "5": ["WATER: HighRes_LAVA_3Nex_0.8x0.8x1mm", "usable", ""],
-        "6": ["FOV_Check_P20_3Dspgr_R2_Mp1_ARC_HS", "usable", ""],
-        "7": ["WATER: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "8": ["UlnarDev_P20_3Dspgr_R2_Mp40_ARC_HS", "usable", ""],
-        "9": ["WATER: WristFlex_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "10": ["WristFlex_P20_3Dspgr_R2_Mp40_ARC_HS", "usable", ""],
-        "11": ["WATER: Rotation_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "12": ["Rotation_P20_3Dspgr_R2_Mp40_ARC_HS", "usable", ""],
-        "500": ["FAT: HighRes_LAVA_3Nex_0.8x0.8x1mm", "usable", ""],
-        "501": ["InPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm", "usable", ""],
-        "502": ["OutPhase: HighRes_LAVA_3Nex_0.8x0.8x1mm", "usable", ""],
-        "700": ["FAT: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "701": ["InPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "702": ["OutPhase: UlnarDev_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "900": ["FAT: WristFlex_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "901": ["InPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "902": ["OutPhase: WristFlex_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "1100": ["FAT: Rotation_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "1101": ["InPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-        "1102": ["OutPhase: Rotation_P20_LAVA_R2_Mp40_ARC_HS", "usable", ""],
-    }
+        "2": ["T1W", "usable", ""],
+        "13": ["ASL 1025PLD", "usable", ""],
+        "14": ["ManPreScan ASL 1525PLD", "usable", ""],
+        "15": ["ManPreScan ASL 2025PLD", "usable", ""],
+        "16": ["ManPreScan ASL 2525PLD", "usable", ""],
+        "17": ["ManPreScan ASL 3025PLD", "usable", ""],
+        "1350": ["CBF:Feb 16 2023 13-17-43 CST", "usable", ""],
+        "1450": ["CBF:Feb 16 2023 13-19-14 CST", "usable", ""],
+        "1550": ["CBF:Feb 16 2023 13-20-42 CST", "usable", ""],
+        "1650": ["CBF:Feb 16 2023 13-22-11 CST", "usable", ""],
+        "1750": ["CBF:Feb 16 2023 13-23-50 CST", "usable", ""]
+        }
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_experiment_note_json(
     example_server,
     example_subject_id,
@@ -196,29 +171,25 @@ def test_get_experiment_note_json(
     assert example_server.get_experiment_note_json(
         example_subject_id, example_experiment_id
     ) == {
-        "dcmPatientId": "06_121720",
-        "dcmPatientWeight": 83.91,
-        "subject_ID": "DEVX_S03114",
-        "date": "2020-12-17",
+        "subject_ID": "CIRXNAT2_S11400",
+        "date": "2023-02-19",
+        "dcmPatientId": "exam0004",
         "modality": "MR",
-        "project": "Sandbox",
+        "prearchivePath": "/data/xnat/prearchive/Sandbox/20230927_173109073/exam0004",
         "scanner/model": "SIGNA Premier",
-        "study_id": "2225",
-        "label": "06_121720",
+        "project": "Sandbox",
         "scanner/manufacturer": "GE MEDICAL SYSTEMS",
-        "operator": "8",
-        "acquisition_site": "MCW Premier",
-        "dcmPatientName": "06",
-        "UID": "1.2.840.113619.6.475.237616204123338346346467786375596601260",
-        "scanner": "MCWPREM",
+        "label": "exam0004",
+        "dcmPatientName": "subject0004",
+        "UID": "1.2.276.0.7230010.3.1.4.8323328.2070476540",
         "fieldStrength": "3.0",
-        "session_type": "Kinematics",
-        "time": "09:42:54",
-        "ID": "DEVX_E07019",
-        "id": "DEVX_E07019",
-    }
+        "id": "CIRXNAT2_E18718",
+        "ID": "CIRXNAT2_E18718",
+        "session_type": "GE_COMPARE"
+        }
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 @pytest.mark.download
 def test_zip_scan_descriptions_to_file_success(
     example_server,
@@ -237,6 +208,7 @@ def test_zip_scan_descriptions_to_file_success(
     os.remove("test_file.zip")
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 @pytest.mark.download
 def test_zip_scan_description_to_file_fail(
     example_server,
@@ -264,5 +236,6 @@ def test_zip_scan_description_to_file_fail(
     )
 
 
+@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_project_dcm_params(example_server):
     assert type(example_server.get_project_dcm_params()) == pd.DataFrame
