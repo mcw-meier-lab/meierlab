@@ -1,4 +1,5 @@
 import pytest
+import os
 import networkx as nx
 from importlib import resources
 from meierlab.networks import graph as ng
@@ -6,12 +7,12 @@ from meierlab.networks import graph as ng
 
 @pytest.fixture
 def atlas():
-    return resources.files("meierlab") / "tests/data/atlas.csv"
+    return os.environ.get["ATLAS_FILE"]
 
 
 @pytest.fixture
 def sub_file():
-    return resources.files("meierlab") / "tests/data/sub-atlas.tsv"
+    return os.environ.get["SUB_FILE"]
 
 
 @pytest.fixture
