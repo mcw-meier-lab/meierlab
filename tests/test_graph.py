@@ -3,16 +3,17 @@ import os
 import networkx as nx
 from importlib import resources
 from meierlab.networks import graph as ng
+from pathlib import Path
 
 
 @pytest.fixture
 def atlas():
-    return os.environ["ATLAS_FILE"]
+    return Path(os.getcwd(),"tests/data/atlas.csv")
 
 
 @pytest.fixture
 def sub_file():
-    return os.environ["SUB_FILE"]
+    return Path(os.getcwd(),"tests/data/sub-atlas.tsv")
 
 
 @pytest.fixture

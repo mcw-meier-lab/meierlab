@@ -38,7 +38,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       env:
-        ATLAS_FILE: ${{ github.workspace }}/meierlab/tests/data/atlas.csv
-        SUB_FILE: ${{ github.workspace }}/meierlab/test/data/sub-atlas.tsv
+        ATLAS_FILE: ${{ github.workspace }}/tests/data/atlas.csv
+        SUB_FILE: ${{ github.workspace }}/tests/data/sub-atlas.tsv
       run: |
         pytest
