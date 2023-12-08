@@ -1,6 +1,7 @@
 [project]
 name = "meierlab"
 version = "0.2.0"
+
 description = "MCW Meier Lab tools"
 authors = [
     {name = "MCW Meier Lab", email = "lespana@mcw.edu"},
@@ -23,6 +24,7 @@ license = {text = "Apache-2.0"}
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
 
 [tool.pdm.dev-dependencies]
 test = [
