@@ -7,12 +7,12 @@ from meierlab.networks import graph as ng
 
 @pytest.fixture
 def atlas():
-    return os.environ.get["ATLAS_FILE"]
+    return os.environ["ATLAS_FILE"]
 
 
 @pytest.fixture
 def sub_file():
-    return os.environ.get["SUB_FILE"]
+    return os.environ["SUB_FILE"]
 
 
 @pytest.fixture
