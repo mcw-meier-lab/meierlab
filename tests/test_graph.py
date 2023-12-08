@@ -6,12 +6,12 @@ from meierlab.networks import graph as ng
 
 @pytest.fixture
 def atlas():
-    return resources.files("meierlab") / "../../tests/data/atlas.csv"
+    return resources.files("meierlab") / "tests/data/atlas.csv"
 
 
 @pytest.fixture
 def sub_file():
-    return resources.files("meierlab") / "../../tests/data/sub-atlas.tsv"
+    return resources.files("meierlab") / "tests/data/sub-atlas.tsv"
 
 
 @pytest.fixture
