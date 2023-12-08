@@ -81,7 +81,7 @@ def test_gen_basic_metrics(G):
     eigenvals = nx.get_node_attributes(basic_g,'eigenvector')
     assert degvals['LH_Vis_1'] == 29
     assert bnvals['LH_Vis_1'] == 0.0
-    assert eigenvals['LH_Vis_1'] == 0.1889822365046136
+    assert eigenvals['LH_Vis_1'] == pytest.approx(0.1889822365046136)
 
 
 def test_gen_subnetwork_list(G, rsn_list):
