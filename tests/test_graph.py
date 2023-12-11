@@ -22,8 +22,8 @@ def G(atlas):
 
 
 @pytest.fixture
-def g(atlas,sub_file):
-    return ng.gen_graph_from_matrix(atlas,sub_file)
+def g(G,atlas,sub_file):
+    return ng.gen_graph_from_matrix(G,atlas,sub_file)
 
 
 @pytest.fixture
@@ -291,3 +291,10 @@ def test_get_between_network_connectivity(g,subgraphs):
     btn = ng.get_between_network_connectivity(rsn_pairs)
     assert list(btn.keys()) == [('DMN', 'Visual')]
     assert list(btn.values()) == [0.5]
+
+
+def test_get_rsn_connectivity_to_all(rsn_list,g,subgraphs):
+    rsn_pairs = ng.gen_subnetwork_pairs(g,subgraphs)
+    averages = ng.get_rsn_connectivity_to_all(rsn_list,rsn_pairs)
+    assert list(averages.keys()) == ["DMN_to_all","DMN_to_all_nodes"]
+    assert list(averages.values()) == [pytest.approx(0.5493061443340548),180]
