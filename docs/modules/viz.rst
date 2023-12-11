@@ -3,11 +3,11 @@
 :mod:`meierlab.viz`: Neuroimaging Visualization Tools
 =====================================================
 
-.. automodule:: meierlab.viz
+:mod:`meierlab.viz.networks` Network Functions
+==============================================
+.. automodule:: meierlab.viz.networks
     :no-members:
     :no-inherited-members:
-
-**Network Functions**
 
 .. currentmodule:: meierlab.viz.networks
 
@@ -21,7 +21,11 @@
     plot_subgraph_connectome
     plot_subgraph_nodes
 
-**Outlier Functions**
+:mod:`meierlab.viz.outliers` Outlier Functions
+==============================================
+.. automodule:: meierlab.viz.outliers
+    :no-members:
+    :no-inherited-members:
 
 .. currentmodule:: meierlab.viz.outliers
 
