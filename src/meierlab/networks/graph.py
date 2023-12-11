@@ -359,7 +359,7 @@ def get_between_network_connectivity(subgraphs, edge_attr="weight"):
         averages[net_pair] = avg
 
         # ensure we get averages only from valid connections
-        averages[f"{net_pair}_nodes"] = len([d[edge_attr] for (_,_d) in sg.edges(data=True) if not np.isnan(d[edge_attr])])
+        averages[f"{net_pair}_nodes"] = len([d[edge_attr] for (_,_,d) in sg.edges(data=True) if not np.isnan(d[edge_attr])])
 
     return averages
 
