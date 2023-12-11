@@ -90,7 +90,8 @@ def gen_graph_from_matrix(G, atlas, matrix_file, atlas_delim=",", matrix_delim="
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> edge_weights = [d[edge_attr] for (_,_,d) in g.edges(data=True)] 
     >>> edge_weights[0:10]
     [1.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
@@ -141,7 +142,8 @@ def gen_basic_metrics(G):
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> g = graph.gen_basic_metrics(g)
     >>> eigenvectors = nx.get_node_attributes(g,'eigenvector')
     >>> print(eigenvectors['RH_Default_Temp_8'])
@@ -215,7 +217,8 @@ def gen_subnetwork_subgraphs(G, subnetwork_list, subnetwork_label="RSN"):
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> rsn_list = graph.gen_subnetwork_list(g)
     >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
     >>> subgraphs[0].nodes()
@@ -254,7 +257,8 @@ def gen_subnetwork_pairs(G, subgraph_list, subnetwork_label="RSN"):
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> rsn_list = graph.gen_subnetwork_list(g)
     >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
     >>> rsn_pairs = graph.gen_subnetwork_pairs(g, subgraphs)
@@ -299,7 +303,8 @@ def get_within_network_connectivity(subgraph, edge_attr="weight"):
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> rsn_list = graph.gen_subnetwork_list(g)
     >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list) 
     >>> avg = graph.get_within_network_connectivity(subgraphs[0])
@@ -335,7 +340,8 @@ def get_between_network_connectivity(subgraphs, edge_attr="weight"):
     >>> from meierlab.networks import graph
     >>> atlas = 'schaefer2018/atlas.csv'
     >>> sub_file = 'sub-001.tsv'
-    >>> g = graph.gen_graph_from_matrix(atlas,sub_file)
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
     >>> rsn_list = graph.gen_subnetwork_list(g)
     >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
     >>> rsn_pairs = graph.gen_subnetwork_pairs(g, subgraphs)
@@ -356,6 +362,53 @@ def get_between_network_connectivity(subgraphs, edge_attr="weight"):
         averages[f"{net_pair}_nodes"] = len([d[edge_attr] for (_,_d) in sg.edges(data=True) if not np.isnan(d[edge_attr])])
 
     return averages
+
+
+def get_rsn_connectivity_to_all(rsn_list, rsn_pairs, edge_attr="weight"):
+    """For each RSN in a list and the corresponding RSN pairs, calculate:
+    - It's average connectivity to each other network given.
+    - The number of valid nodes that connect the RSN to it's pair.
+    This helps generate an understanding of how connected a particular RSN is to each RSN in the parcellation, taking into account that not all nodes in an RSN have a valid connection to each other node in another RSN.
+
+    Parameters
+    ----------
+    rsn_list : list
+        List of RSNs of interest.
+    rsn_pairs : dict
+        Dictionary of pairs containing the RSN(s) of interest and their related RSNs.
+    edge_attr : str, optional
+        Edge attribute label, default "weight".
+
+    Examples
+    --------
+    >>> from meierlab.networks import graph
+    >>> atlas = 'schaefer2018/atlas.csv'
+    >>> sub_file = 'sub-001.tsv'
+    >>> G = graph.gen_base_graph_from_atlas(atlas)
+    >>> g = graph.gen_graph_from_matrix(G,atlas,sub_file)
+    >>> rsn_list = graph.gen_subnetwork_list(g)
+    >>> subgraphs = graph.gen_subnetwork_subgraphs(g, rsn_list)
+    >>> rsn_pairs = graph.gen_subnetwork_pairs(g, subgraphs)
+    >>> rsns_to_all = graph.get_rsn_connectivity_to_all(rsn_list,rsn_pairs)
+    >>> rsns_to_all
+    {'DMN_to_all': 0.5493061443340548, 'DMN_to_all_nodes': 180}
+    """
+    rsn_to_all = {}
+    for idx, rsn in enumerate(rsn_list):
+        sum_nodes = 0
+        sum_weights = 0
+        pair_list = [pair for pair in rsn_pairs if rsn in pair and "_nodes" not in pair]
+
+        for pair in pair_list:
+            sum_nodes += len([d[edge_attr] for (_,_,d) in rsn_pairs[pair].edges(data=True) if not np.isnan(d[edge_attr])])
+            weights = [d[edge_attr] for (_,_,d) in rsn_pairs[pair].edges(data=True) if not np.isnan(d[edge_attr])]
+            sum_weights += np.sum(weights)
+
+        avg = sum_weights / sum_nodes
+        rsn_to_all[f"{rsn}_to_all"] = avg
+        rsn_to_all[f"{rsn}_to_all_nodes"] = sum_nodes
+
+        return rsn_to_all
 
 
 
