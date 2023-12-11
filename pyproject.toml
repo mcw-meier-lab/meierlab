@@ -16,7 +16,6 @@ dependencies = [
     "plotly>=5.16.1",
     "dash>=2.13.0",
     "jupyter-dash>=0.4.2",
-    "matplotlib>=3.8.2",
 ]
 requires-python = ">=3.9"
 readme = "README.rst"
@@ -43,7 +42,6 @@ doc = [
     "numpydoc>=1.5.0",
     "furo>=2023.8.19",
     "myst-parser>=2.0.0",
-    "sphinx-copybutton>=0.5.2",
 ]
 lint = [
 ]
