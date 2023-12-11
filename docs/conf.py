@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath("sphinxext"))
 from github_link import make_linkcode_resolve
 
 # We also add the directory just above to enable local imports
-sys.path.insert(0, os.path.abspath(os.path.join("..","..","src")))
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -31,7 +31,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.extlinks",
     "sphinx.ext.todo",
-    "sphinx.ext.autosectionlabel",
     "sphinx_design",
     "sphinx_gallery.gen_gallery",
     "sphinx_copybutton",
@@ -46,7 +45,6 @@ autodoc_default_options = {
     "undoc-members": True,
     "member-order": "bysource",
 }
-autosectionlabel_prefix_document = True
 
 numpydoc_show_class_members = False
 
@@ -54,10 +52,10 @@ intersphinx_mapping = {
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3.10/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "nibabel": ("https://nipy.org/nibabel", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "nilearn": ("https://nilearn.github.io/stable/", None),
-    "nibabel": ("https://nipy.org/nibabel/", None),
+    "nilearn": ("https://nilearn.github.io/stable/", None)
 }
 intersphinx_disabled_domains = ["std"]
 
