@@ -1,4 +1,4 @@
-.. _cirxnat:
+.. _cirxnat_ref:
 
 :class:`meierlab.cirxnat.Cirxnat`: CIRXNAT Server
 =================================================
