@@ -15,39 +15,6 @@ Examples
     </div>
 
 =============================
-Downloading and checking data
-=============================
-
-See :ref:`cirxnat` for more details.
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbnails">
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="See how to use download tools and verify the data.">
-
-.. only:: html
-
-  .. image:: /auto_examples/00_tutorials/images/thumb/sphx_glr_plot_downloads_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_00_tutorials_plot_downloads.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Basic Downloads</div>
-    </div>
-
-
-.. raw:: html
-
-    </div>
-
-=============================
 Visualization of brain images
 =============================
 
@@ -86,7 +53,6 @@ See :ref:`viz` for more details.
    :includehidden:
 
 
-   /auto_examples/00_tutorials/index.rst
    /auto_examples/01_plotting/index.rst
 
 
