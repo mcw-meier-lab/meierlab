@@ -16,6 +16,10 @@ def get_atlas_coords(atlas_img):
     -------
     numpy.ndarray
         Atlas coordinates.
+
+    Examples
+    --------
+    >>> from meierlab.viz import network_viz as nv
     """
     return plotting.find_parcellation_cut_coords(atlas_img)
 
@@ -34,6 +38,10 @@ def get_subgraph_coords(subgraph, atlas_coords):
     -------
     numpy.ndarray
         Atlas coordinates for the given `subgraph`.
+
+    Examples
+    --------
+    >>> from meierlab.viz import network_viz as nv
     """
     idx_list = list(nx.get_node_attributes(subgraph,"index").values())
     coords = atlas_coords[[int(idx)-1 for idx in idx_list]]
@@ -59,6 +67,10 @@ def plot_connectome_from_graph(g, atlas_coords, threshold="80%", dim="2d"):
     -------
     view : :class:`nilearn.plotting.html_connectome.ConnectomeView`
         Nilearn connectome viewer. Save as an html page or view using 'open_in_browser' method.
+
+    Examples
+    --------
+    >>> from meierlab.viz import network_viz as nv
     """
     
     mtx = nx.convert_matrix.to_numpy_array(g)
@@ -88,6 +100,10 @@ def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%", dim="2d"):
     -------
     view : :class:`nilearn.plotting.html_connectome.ConnectomeView`
         Nilearn connectome viewer with the subgraph. Save as an html page or view using 'open_in_browser' method.
+
+    Examples
+    --------
+    >>> from meierlab.viz import network_viz as nv
     """
     coords = get_subgraph_coords(subgraph, atlas_coords)
     mtx = nx.convert_matrix.to_numpy_array(subgraph)
@@ -116,6 +132,10 @@ def plot_subgraph_nodes(subgraph, atlas_coords, size=10):
     -------
     view : :class:`nilearn.plotting.html_connectome.ConnectomeView`
         Nilearn connectome viewer with the nodes from the subgraph. Save as an html page of view using 'open_in_browser' method.
+        
+    Examples
+    --------
+    >>> from meierlab.viz import network_viz as nv
     """
     coords = get_subgraph_coords(subgraph, atlas_coords)
     colors = list(nx.get_node_attributes(subgraph,"color").values())

@@ -23,6 +23,10 @@ def gen_figs(outlier_df,x_cols,
     -------
     list
         List of :class:`~plotly.graph_objects.Figure` violin plots.
+
+    Examples
+    --------
+    >>> from meierlab.viz import outlier_viz as ov
     """
     figs = list(zip(x_cols, y_cols))
     out_figs = []
@@ -68,6 +72,10 @@ def get_app(figures,app_type=None):
     -------
     :class:`~dash.Dash` or :class:`~jupyter_dash.JupyterDash`
         Dash HTML app with figures to view. Run via `app.run()` and open a browser with the local host address (or view through Jupyter).
+
+    Examples
+    --------
+    >>> from meierlab.viz import outlier_viz as ov
     """
     if app_type == "jupyter":
         from jupyter_dash import JupyterDash
