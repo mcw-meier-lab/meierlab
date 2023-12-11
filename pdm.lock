@@ -3,9 +3,8 @@
 
 [metadata]
 groups = ["default", "pre-commit", "doc", "test", "lint", "dev"]
-cross_platform = true
-static_urls = false
-lock_version = "4.3"
+strategy = ["cross_platform"]
+lock_version = "4.4"
 content_hash = "sha256:7182460fd21bd2a66eefeb8fad294a6d5305bf1e3d6a84701a5a589b881a43b9"
 
 [[package]]
