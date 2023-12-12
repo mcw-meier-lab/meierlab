@@ -1,3 +1,10 @@
+.. image:: https://github.com/mcw-meier-lab/meierlab/actions/workflows/python-package.yml/badge.svg
+    :target: https://github.com/mcw-meier-lab/meierlab/actions/workflows/python-package.yml
+    :alt: Package Build Status
+.. image:: https://readthedocs.org/projects/meierlab/badge/?version=latest
+    :target: https://meierlab.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 Meier Lab tools
 ---------------
 
@@ -22,7 +29,7 @@ Conda::
 
 Venv::
     python -m venv py-meierlab
-    source py-meierlab/bin/activate  
+    source py-meierlab/bin/activate
 
 You can then install ``meierlab`` with pip::
 
@@ -44,7 +51,7 @@ License
 -------
 
 Copyright (c) 2023, MCW Meier-Lab.
-``meierlab`` was created by Lezlie España as part of the MCW Meier Lab. 
+``meierlab`` was created by Lezlie España as part of the MCW Meier Lab.
 It is licensed under the BSD 3-Clause License.
 
 
@@ -53,5 +60,5 @@ Credits
 
 ``meierlab`` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
 
-Many thanks to the python neuroimaging packages that make our work possible, 
+Many thanks to the python neuroimaging packages that make our work possible,
 especially the `NIPY developers <https://nipy.org/>`.
