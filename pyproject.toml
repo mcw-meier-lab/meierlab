@@ -1,6 +1,6 @@
 [project]
 name = "meierlab"
-version = "0.2.0"
+version = "v0.1.0-beta"
 
 description = "MCW Meier Lab tools"
 authors = [
