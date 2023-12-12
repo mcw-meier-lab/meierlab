@@ -1,29 +1,42 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-    -   id: check-ast
-    -   id: check-case-conflict
-    -   id: check-json
-    -   id: check-merge-conflict
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-    -   id: check-toml
-
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-    -   id: isort
-        args: [--profile, black]
-      
--   repo: https://github.com/psf/black
-    rev: stable
-    hooks:
-    - id: black
-      language_version: python3.9
-
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-    - id: flake8
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+  - id: check-ast
+  - id: check-case-conflict
+  - id: check-json
+  - id: check-merge-conflict
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-toml
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.7.1
+  hooks:
+  - id: mypy
+    args: [--no-strict-optional,--ignore-missing-imports]
+    files: ^(docs/|tests/)
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 23.11.0
+  hooks:
+  - id: black
+    files: ^(tests/)
+  - id: black-jupyter
+    files: ^(tests/)
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.1
+  hooks:
+  - id: isort
+    name: isort (python)
+    args: [
+        '--line-length=110',
+        '--multi-line=3',
+        '--force-grid-wrap=0',
+        '--trailing-comma',
+        '--use-parentheses',
+        '--ensure-newline-before-comments']
+- repo: https://github.com/PyCQA/flake8
+  rev: 6.1.0
+  hooks:
+  - id: flake8
+    files: ^(tests/)
