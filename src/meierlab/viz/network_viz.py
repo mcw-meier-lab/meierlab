@@ -43,8 +43,8 @@ def get_subgraph_coords(subgraph, atlas_coords):
     --------
     >>> from meierlab.viz import network_viz as nv
     """
-    idx_list = list(nx.get_node_attributes(subgraph,"index").values())
-    coords = atlas_coords[[int(idx)-1 for idx in idx_list]]
+    idx_list = list(nx.get_node_attributes(subgraph, "index").values())
+    coords = atlas_coords[[int(idx) - 1 for idx in idx_list]]
 
     return coords
 
@@ -72,12 +72,12 @@ def plot_connectome_from_graph(g, atlas_coords, threshold="80%", dim="2d"):
     --------
     >>> from meierlab.viz import network_viz as nv
     """
-    
+
     mtx = nx.convert_matrix.to_numpy_array(g)
     if dim == "2d":
-        view = plotting.plot_connectome(mtx,atlas_coords,edge_threshold=threshold)
+        view = plotting.plot_connectome(mtx, atlas_coords, edge_threshold=threshold)
     else:
-        view = plotting.view_connectome(mtx,atlas_coords,edge_threshold=threshold)
+        view = plotting.view_connectome(mtx, atlas_coords, edge_threshold=threshold)
 
     return view
 
@@ -109,9 +109,9 @@ def plot_subgraph_connectome(subgraph, atlas_coords, threshold="80%", dim="2d"):
     mtx = nx.convert_matrix.to_numpy_array(subgraph)
 
     if dim == "2d":
-        view = plotting.plot_connectome(mtx,coords,edge_threshold=threshold)
+        view = plotting.plot_connectome(mtx, coords, edge_threshold=threshold)
     else:
-        view = plotting.view_connectome(mtx,coords,edge_threshold=threshold)
+        view = plotting.view_connectome(mtx, coords, edge_threshold=threshold)
 
     return view
 
@@ -132,15 +132,14 @@ def plot_subgraph_nodes(subgraph, atlas_coords, size=10):
     -------
     view : :class:`nilearn.plotting.html_connectome.ConnectomeView`
         Nilearn connectome viewer with the nodes from the subgraph. Save as an html page of view using 'open_in_browser' method.
-        
+
     Examples
     --------
     >>> from meierlab.viz import network_viz as nv
     """
     coords = get_subgraph_coords(subgraph, atlas_coords)
-    colors = list(nx.get_node_attributes(subgraph,"color").values())
-    labels = list(nx.get_node_attributes(subgraph,"label").values())
+    colors = list(nx.get_node_attributes(subgraph, "color").values())
+    labels = list(nx.get_node_attributes(subgraph, "label").values())
     view = plotting.view_markers(coords, colors, size, labels)
 
     return view
-
