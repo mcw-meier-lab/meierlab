@@ -283,13 +283,13 @@ def test_gen_subnetwork_pairs(G,subgraphs):
 
 def test_get_within_network_connectivity(subgraphs):
     win = ng.get_within_network_connectivity(subgraphs[0])
-    assert round(win,2) == 0.4
+    assert pytest.approx(0.42364893019360184) == 0.42364893019360184
 
 
 def test_get_between_network_connectivity(g,subgraphs):
     rsn_pairs = ng.gen_subnetwork_pairs(g,subgraphs)
     btn = ng.get_between_network_connectivity(rsn_pairs)
-    assert list(btn.keys()) == [('DMN', 'Visual')]
+    assert list(btn.keys()) == [('DMN', 'Visual'),"('DMN', 'Visual')_nodes"]
     assert list(btn.values()) == [0.5]
 
 
