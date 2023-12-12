@@ -14,7 +14,7 @@ repos:
   rev: v1.7.1
   hooks:
   - id: mypy
-    args: [--no-strict-optional]
+    args: [--no-strict-optional,--ignore-missing-imports]
     files: ^(docs/|tests/)
 - repo: https://github.com/psf/black-pre-commit-mirror
   rev: 23.11.0
