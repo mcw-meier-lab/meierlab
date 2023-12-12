@@ -1,0 +1,10 @@
+.. currentmodule:: meierlab
+
+v0.1.0-beta
+===========
+*Re-initalizing package release.*
+
+Meierlab package contains tools for downloading,
+processing, and visualizing data. Mainly: downloading
+from our XNAT server, computing graph metrics, and
+some plotting/visualization.
