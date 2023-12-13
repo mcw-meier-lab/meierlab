@@ -760,3 +760,62 @@ class Cirxnat:
             proj_df = pd.concat([proj_df, exp_df])
 
         return proj_df
+
+    def get_json_data(self,subject_id,experiment_id,scan_descs):
+        """Get BIDS JSON sidecar data for an experiment.
+
+        Useful for data that's already downloaded but not
+        setup for BIDS format. GE data only (for now).
+
+        Parameters
+        ----------
+        subject_id : str
+            Subject label from XNAT.
+        experiment_id : str
+            Experiment label from XNAT.
+        scan_list : list
+            Scan descriptions to generate data for.
+
+        Returns
+        -------
+        dict
+            Dictionaries of experiment {scan_desc:tags}
+            with their scans and associated DICOM tag
+            data for BIDS json files.
+
+        Examples
+        --------
+        >>> import os
+        >>> import json
+        >>> from meierlab import cirxnat
+        >>> cir1_pass = os.getenv('CIR1')
+        >>> cir1_addr = os.getenv('CIR1ADDR')
+        >>> server = cirxnat.Cirxnat(address=cir1_addr,
+        project='UWARC',user='lespana',password=cir1_pass)
+        >>> experiment = server.print_all_experiments()[0]
+        >>> scan_list = ["ORIG MPRAGE"]
+        >>> dcm_data = server.get_json_data(experiment["subject_label"],experiment["experiment_label"],scan_list)
+        >>> json_data = dcm_data[scan_list[0]]
+        >>> print(json.dumps(json_data,indent=4)
+        """
+        dicom_tags = ["Acquisition Matrix PE", "Acquisition Number", "Acquisition Time", "Coil String", "Device Serial Number", "Echo Time", "Flip Angle", "Image Orientation Patient DICOM", "Image Type", "Imaging Frequency", "In Plane Phase Encoding Direction DICOM", "Institution Name", "Inversion Time", "MR Acquisition Type", "Magnetic Field Strength", "Manufacturer", "Manufacturers Model Name", "Modality", "Parallel Reduction Factor In Plane", "Parallel Reduction Out Of Plane", "Patient Position", "Percent Phase FOV", "Percent Sampling", "Pixel Bandwidth", "Procedure Step Description", "Protocol Name", "Recon Matrix PE", "Repetition Time", "SAR", "Scan Options", "Scanning Sequence", "Sequence Variant", "Series Description", "Series Number", "Slice Thickness", "Software Versions", "Spacing Between Slices", "Station Name"]
+
+        scan_dcm = {}
+        scan_descs = self.get_scans_dictionary(subject_id,experiment_id)
+        new_scans = {id:desc for id,desc in scan_descs.items()
+                     if any(x in desc for x in scan_descs)}
+        for num, desc in new_scans.items():
+            dcm = {}
+            dcm_hdr = self.get_dicom_header(experiment_id,num)
+            for tag in dcm_hdr:
+                for tag_desc in dicom_tags:
+                    if tag_desc in tag["desc"]:
+                        try:
+                            tag_val = float(tag["value"])
+                        except ValueError:
+                            tag_val = tag["value"]
+
+                        dcm[tag_desc.replace(" ","")] = tag_val
+            scan_dcm[desc] = dcm
+
+        return scan_dcm
