@@ -57,6 +57,14 @@ lint = [
 markers = [
     "download: actually download data"
 ]
+minversion = "7.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
 
 [tool.bumpver]
 current_version = "0.1.0-beta"
@@ -77,4 +85,13 @@ push = false
 "README.rst" = [
     "{version}",
     "{pep440_version}",
+]
+[tool.ruff]
+src = ["src"]
+lint.extend-select = [
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "PGH",         # pygrep-hooks
+  "RUF",         # Ruff-specific
+  "UP",          # pyupgrade
 ]
