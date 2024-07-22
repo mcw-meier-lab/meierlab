@@ -8,8 +8,8 @@ Welcome to the MCW Meier Lab documentation!
 
 .. container:: index-paragraph
 
-   The **meierlab** project provides functional tools to aid 
-   lab members in downloading, processing, visualizing, 
+   The **meierlab** project provides functional tools to aid
+   lab members in downloading, processing, visualizing,
    and analyzing imaging data.
 
 .. note::

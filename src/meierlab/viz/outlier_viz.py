@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import io
 from base64 import b64encode
@@ -7,9 +6,7 @@ import plotly.graph_objects as go
 from dash import dcc, html
 
 
-def gen_figs(
-    outlier_df, x_cols, y_cols=[("pos_count", "neg_count"), ("pos_pct", "neg_pct")]
-):
+def gen_figs(outlier_df, x_cols, y_cols=None):
     """Generate plotly figures from an outlier dataframe.
 
     Parameters
@@ -30,6 +27,8 @@ def gen_figs(
     --------
     >>> from meierlab.viz import outlier_viz as ov
     """
+    if y_cols is None:
+        y_cols = [("pos_count", "neg_count"), ("pos_pct", "neg_pct")]
     figs = list(zip(x_cols, y_cols))
     out_figs = []
     for x, y in figs:

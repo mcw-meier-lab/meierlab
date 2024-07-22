@@ -5,7 +5,6 @@ import sys
 from functools import partial
 from operator import attrgetter
 
-
 # from https://github.com/nilearn/nilearn/blob/70450b5ceb03157a249b0b4e36590ef5a674ccb9/doc/sphinxext/github_link.py
 
 REVISION_CMD = "git rev-parse --short HEAD"
@@ -65,16 +64,12 @@ def _linkcode_resolve(domain, info, package, url_fmt, revision):
     if os.path.dirname(__import__(package).__file__) not in fn:
         return
 
-    fn = os.path.relpath(
-        fn, start=os.path.dirname(__import__(package).__file__)
-    )
+    fn = os.path.relpath(fn, start=os.path.dirname(__import__(package).__file__))
     try:
         lineno = inspect.getsourcelines(obj)[1]
     except Exception:
         lineno = ""
-    return url_fmt.format(
-        revision=revision, package=package, path=fn, lineno=lineno
-    )
+    return url_fmt.format(revision=revision, package=package, path=fn, lineno=lineno)
 
 
 def make_linkcode_resolve(package, url_fmt):

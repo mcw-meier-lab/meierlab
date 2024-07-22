@@ -19,22 +19,22 @@ rsn_list = ng.gen_subnetwork_list(G)
 ######################################################
 # Visualize the full network
 # --------------------------
-full_connectome = nv.plot_connectome_from_graph(G,atlas_coords)
-full_connectome
+full_connectome = nv.plot_connectome_from_graph(G, atlas_coords)
+full_connectome.show()
 
 ######################################################
 # Visualize a single subnetwork, in this case Visual
 # --------------------------------------------------
 vis = [rsn for rsn in rsn_list if rsn == "Visual"]
-vis_graph = ng.gen_subnetwork_subgraphs(G,vis)
+vis_graph = ng.gen_subnetwork_subgraphs(G, vis)
 
-vis = nv.plot_subgraph_connectome(vis_graph[0],atlas_coords)
-vis
+vis = nv.plot_subgraph_connectome(vis_graph[0], atlas_coords)
+vis.show()
 
 ###########################################################
 # Visualize the nodes of a subnetwork, in this case Visual
 # --------------------------------------------------------
 
-vis_nodes = nv.plot_subgraph_nodes(vis_graph[0],atlas_coords)
+vis_nodes = nv.plot_subgraph_nodes(vis_graph[0], atlas_coords)
 # open in browser or save html with vis_nodes.save_as_html()
-#vis_nodes.open_in_browser()
+# vis_nodes.open_in_browser()

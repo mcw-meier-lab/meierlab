@@ -1,6 +1,8 @@
-import pytest
 import os
+
 import pandas as pd
+import pytest
+
 
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_user(example_server):
@@ -25,7 +27,7 @@ def test_get_subjects_json(example_server):
         "ID": "CIRXNAT2_S11400",
         "label": "subject0004",
         "insert_user": "admin",
-        "URI": "/data/subjects/CIRXNAT2_S11400"
+        "URI": "/data/subjects/CIRXNAT2_S11400",
     }
 
 
@@ -40,7 +42,7 @@ def test_get_experiments_json(example_server, example_subject_id):
             "project": "Sandbox",
             "ID": "CIRXNAT2_E18718",
             "label": "exam0004",
-            "URI": "/data/experiments/CIRXNAT2_E18718"
+            "URI": "/data/experiments/CIRXNAT2_E18718",
         }
     ]
 
@@ -57,7 +59,7 @@ def test_get_scans_json(example_server, example_subject_id, example_experiment_i
         "ID": "2",
         "type": "T1W",
         "URI": "/data/experiments/CIRXNAT2_E18718/scans/2",
-        "quality": "usable"
+        "quality": "usable",
     }
 
 
@@ -87,15 +89,16 @@ def test_get_scans_dictionary(
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_print_all_experiments(example_server):
     assert example_server.print_all_experiments() == [
-    {
-        "experiment_label": "exam0004",
-        "experiment_id": "CIRXNAT2_E18718",
-        "subject_label": "subject0004",
-        "subject_id": "CIRXNAT2_S11400",
-        "date": "2023-02-19",
-        "insert_date": "2023-09-27 17:31:21.352",
-        "uri": "/data/experiments/CIRXNAT2_E18718" 
-    }]
+        {
+            "experiment_label": "exam0004",
+            "experiment_id": "CIRXNAT2_E18718",
+            "subject_label": "subject0004",
+            "subject_id": "CIRXNAT2_S11400",
+            "date": "2023-02-19",
+            "insert_date": "2023-09-27 17:31:21.352",
+            "uri": "/data/experiments/CIRXNAT2_E18718",
+        }
+    ]
 
 
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
@@ -124,7 +127,7 @@ def test_get_dicom_tag(
             "vr": "DS",
             "value": "2.008",
             "tag2": "",
-            "desc": "Echo Time"
+            "desc": "Echo Time",
         }
     ]
     # if tag retrieval fails
@@ -158,8 +161,8 @@ def test_get_scans_usability(
         "1450": ["CBF:Feb 16 2023 13-19-14 CST", "usable", ""],
         "1550": ["CBF:Feb 16 2023 13-20-42 CST", "usable", ""],
         "1650": ["CBF:Feb 16 2023 13-22-11 CST", "usable", ""],
-        "1750": ["CBF:Feb 16 2023 13-23-50 CST", "usable", ""]
-        }
+        "1750": ["CBF:Feb 16 2023 13-23-50 CST", "usable", ""],
+    }
 
 
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
@@ -185,8 +188,8 @@ def test_get_experiment_note_json(
         "fieldStrength": "3.0",
         "id": "CIRXNAT2_E18718",
         "ID": "CIRXNAT2_E18718",
-        "session_type": "GE_COMPARE"
-        }
+        "session_type": "GE_COMPARE",
+    }
 
 
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
@@ -238,4 +241,4 @@ def test_zip_scan_description_to_file_fail(
 
 @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_project_dcm_params(example_server):
-    assert type(example_server.get_project_dcm_params()) == pd.DataFrame
+    assert isinstance(example_server.get_project_dcm_params()) == pd.DataFrame

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import networkx as nx
 from nilearn import plotting

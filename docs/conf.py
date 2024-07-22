@@ -3,8 +3,9 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
-import re
 import sys
+
+import meierlab
 
 sys.path.insert(0, os.path.abspath("sphinxext"))
 from github_link import make_linkcode_resolve
@@ -15,9 +16,9 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'meierlab'
-copyright = '2023, MCW-Meier-Lab'
-author = 'MCW Meier Lab team'
+project = "meierlab"
+copyright = "2023, MCW-Meier-Lab"
+author = "MCW Meier Lab team"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -55,36 +56,30 @@ intersphinx_mapping = {
     "nibabel": ("https://nipy.org/nibabel", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "nilearn": ("https://nilearn.github.io/stable/", None)
+    "nilearn": ("https://nilearn.github.io/stable/", None),
 }
 intersphinx_disabled_domains = ["std"]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-source_suffix = {
-    ".rst": "restructuredtext",
-    ".md": "markdown"
-}
+source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 plot_gallery = "True"
 
 html_css_files = [
-        (
-            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        ),
+    ("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"),
 ]
 
 # The full current version, including alpha/beta/rc tags.
-import meierlab
 
 current_version = meierlab.__version__
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_static_path = ['_static']
+html_theme = "furo"
+html_static_path = ["_static"]
 html_title = "meierlab"
 html_short_title = "meierlab"
 
@@ -102,5 +97,5 @@ linkcode_resolve = make_linkcode_resolve(
     "meierlab",
     "https://github.com/mcw-meier-lab/meierlab"
     "/blob/{revision}/src/"
-    "{package}/{path}#L{lineno}"
+    "{package}/{path}#L{lineno}",
 )
