@@ -317,8 +317,12 @@ def gen_subnetwork_pairs(G, subgraph_list, subnetwork_label="RSN"):
         edge_list = list(product(nodes_1, nodes_2))
 
         combined = G.edge_subgraph(edge_list)
-        label_1 = next(list(nx.get_node_attributes(net_1, subnetwork_label)))
-        label_2 = next(list(nx.get_node_attributes(net_2, subnetwork_label)))
+        label_1 = next(
+            iter(list(nx.get_node_attributes(net_1, subnetwork_label).values()))
+        )
+        label_2 = next(
+            iter(list(nx.get_node_attributes(net_2, subnetwork_label).values()))
+        )
         paired_subgraphs[(label_1, label_2)] = combined
 
     return paired_subgraphs
