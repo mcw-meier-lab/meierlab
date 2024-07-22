@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide graph functions for analyzing functional connectomes."""
 
@@ -53,7 +52,7 @@ def gen_base_graph_from_atlas(atlas, atlas_delim=","):
     """
     G = nx.Graph()
 
-    with open(atlas, 'r') as atlas_file:
+    with open(atlas) as atlas_file:
         atlas_reader = csv.reader(atlas_file, delimiter=atlas_delim)
 
         # get header
@@ -123,8 +122,8 @@ def gen_graph_from_matrix(
     corr_df = pd.read_csv(matrix_file, delimiter=matrix_delim, header=None)
     atlas_df = pd.read_csv(atlas, delimiter=atlas_delim)
 
-    corr_df.columns = atlas_df['label']
-    corr_df.index = atlas_df['label']
+    corr_df.columns = atlas_df["label"]
+    corr_df.index = atlas_df["label"]
 
     # fisher z-score the correlations
     if to_fz:
@@ -174,13 +173,13 @@ def gen_basic_metrics(G):
     0.1889822365046136
     """
     degree_dict = dict(G.degree(G.nodes()))
-    nx.set_node_attributes(G, degree_dict, 'degree')
+    nx.set_node_attributes(G, degree_dict, "degree")
 
     betweenness_dict = nx.betweenness_centrality(G)
-    nx.set_node_attributes(G, betweenness_dict, 'betweenness')
+    nx.set_node_attributes(G, betweenness_dict, "betweenness")
 
     eigenvector_dict = nx.eigenvector_centrality(G)
-    nx.set_node_attributes(G, eigenvector_dict, 'eigenvector')
+    nx.set_node_attributes(G, eigenvector_dict, "eigenvector")
 
     return G
 
@@ -318,8 +317,12 @@ def gen_subnetwork_pairs(G, subgraph_list, subnetwork_label="RSN"):
         edge_list = list(product(nodes_1, nodes_2))
 
         combined = G.edge_subgraph(edge_list)
-        label_1 = list(nx.get_node_attributes(net_1, subnetwork_label).values())[0]
-        label_2 = list(nx.get_node_attributes(net_2, subnetwork_label).values())[0]
+        label_1 = next(
+            iter(list(nx.get_node_attributes(net_1, subnetwork_label).values()))
+        )
+        label_2 = next(
+            iter(list(nx.get_node_attributes(net_2, subnetwork_label).values()))
+        )
         paired_subgraphs[(label_1, label_2)] = combined
 
     return paired_subgraphs
@@ -452,7 +455,7 @@ def get_rsn_connectivity_to_all(rsn_list, rsn_pairs, edge_attr="weight"):
     {'DMN_to_all': 0.5493061443340548, 'DMN_to_all_nodes': 180}
     """
     rsn_to_all = {}
-    for idx, rsn in enumerate(rsn_list):
+    for _, rsn in enumerate(rsn_list):
         sum_nodes = 0
         sum_weights = 0
         pair_list = [pair for pair in rsn_pairs if rsn in pair and "_nodes" not in pair]

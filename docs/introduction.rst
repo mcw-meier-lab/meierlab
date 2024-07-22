@@ -8,7 +8,7 @@ What is ``meierlab``?
 
 ``meierlab`` is a package built by members of the MCW
 Meier Lab to help facilitate our day-to-day lab activities
-and analyses on neuroimaging data. A lot of our processes 
+and analyses on neuroimaging data. A lot of our processes
 are common across projects and datasets
 It contains tools to download data, visualize data for QC,
 perform outlier analyses, process connectivity data, and more.
@@ -23,13 +23,13 @@ help you get started.
 Using ``meierlab`` for the first time
 =====================================
 
-``meierlab`` is a Python library. If you have never used 
+``meierlab`` is a Python library. If you have never used
 Python before, you may find it useful to explore some other
 tutorials and wikis before going through this guide:
 
 `general introduction about Python <http://www.learnpython.org/>`_
 
-`introduction to using Python for science <http://scipy-lectures.github.io/>`_ 
+`introduction to using Python for science <http://scipy-lectures.github.io/>`_
 
 .. note::
 
@@ -40,8 +40,8 @@ tutorials and wikis before going through this guide:
 First steps with ``meierlab``
 -----------------------------
 
-At this stage, you should have :ref:`installed <quickstart>` ``meierlab`` and 
-opened a Jupyter notebook or an IPython / Python session.  
+At this stage, you should have :ref:`installed <quickstart>` ``meierlab`` and
+opened a Jupyter notebook or an IPython / Python session.
 First, load ``meierlab`` with
 
 .. code-block:: default
@@ -78,8 +78,3 @@ scope of this package...
 - Other useful python packages to know: `Numpy <https://numpy.org/doc/stable/>`_ is especially useful for matrix manipulation and general numeric functions, `Pandas <https://pandas.pydata.org/docs/index.html>`_ has many utilities for handling tabular data, and `Networkx <https://networkx.org/>`_ is used for graph creation, analysis, and visualization.
 
 - You will also see references to other neuroimaging packages that aren't necessarily written in Python: `AFNI <https://afni.nimh.nih.gov/pub/dist/doc/htmldoc/index.html>`_, `FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki>`_, among others.
-
-
-
-
-

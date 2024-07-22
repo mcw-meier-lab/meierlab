@@ -22,6 +22,9 @@ requires-python = ">=3.9"
 readme = "README.rst"
 license = {text = "Apache-2.0"}
 
+[project.optional-dependencies]
+test=["pytest>=7.4.0","pytest-cov>=4.1.0"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -33,7 +36,6 @@ skip-string-normalization = true
 test = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
-    "coverage>=7.3.0",
 ]
 doc = [
     "sphinx>=7.2.5",
@@ -47,20 +49,24 @@ doc = [
     "myst-parser>=2.0.0",
     "sphinx-copybutton>=0.5.2",
 ]
-lint = [
-    "mypy>=1.7.1",
-    "black>=23.12.0",
-    "flake8>=6.1.0",
-]
 dev = [
     "pre-commit>=3.3.3",
-    "isort>=5.12.0",
-    "flake8>=6.1.0",
-    "black>=23.7.0",
+    "pip-tools>=7.4.1",
+]
+lint = [
+    "ruff>=0.5.4",
 ]
 [tool.pytest.ini_options]
 markers = [
     "download: actually download data"
+]
+minversion = "7.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
 ]
 
 [tool.bumpver]
@@ -82,4 +88,13 @@ push = false
 "README.rst" = [
     "{version}",
     "{pep440_version}",
+]
+[tool.ruff]
+src = ["src"]
+lint.extend-select = [
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "PGH",         # pygrep-hooks
+  "RUF",         # Ruff-specific
+  "UP",          # pyupgrade
 ]

@@ -82,7 +82,7 @@ def get_mag_data(real_dcm_dir, imag_dcm_dir, target_file, out_dir, out_file=None
     field_map, _ = load_dcm(real_dcm_dir, imag_dcm_dir)
 
     target = load(target_file)
-    out_file = out_file if out_file != None else ""
+    out_file = out_file if out_file is not None else ""
 
     # magnitude
     img = np.abs(field_map)

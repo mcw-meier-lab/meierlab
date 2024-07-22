@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """XNAT base for python3 using requests."""
+
 import json
 import os
 import time
@@ -435,7 +435,7 @@ class Cirxnat:
         response = self.session.get(url, params=payload).text.rstrip()
         return (json.loads(response))["ResultSet"]["Result"]
 
-    def get_dicom_tags(self, experiment, scans_list, extra_tags={}):
+    def get_dicom_tags(self, experiment, scans_list, extra_tags=None):
         """Get common dicom tag info.
 
         Defaults include:
@@ -488,6 +488,8 @@ class Cirxnat:
         >>> print(tags[1]['echo_time'])
         '1.448'
         """
+        if extra_tags is None:
+            extra_tags = {}
         tags = {
             "(0008,0008)": "image_type",
             "(0008,0022)": "scan_date",
@@ -526,9 +528,9 @@ class Cirxnat:
             dcm_hdr = self.get_dicom_header(experiment_id=experiment, scan_num=scan)
 
             try:
-                channel_hdr = list(
-                    filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr)
-                )[0]["value"]
+                channel_hdr = next(
+                    list(filter(lambda x: "RxChannelConnected" in x["value"], dcm_hdr))
+                )["value"]
                 tag_vals["channels"] = self._parse_shadow_hdr(channel_hdr)
             except Exception:
                 tag_vals["channels"] = ""
@@ -543,7 +545,7 @@ class Cirxnat:
 
         return scans_dcm
 
-    def get_scans_usability(self, subject_id, experiment_id, scan_list=[]):
+    def get_scans_usability(self, subject_id, experiment_id, scan_list=None):
         """Get a dictionary of subject scans and their usability.
 
         Parameters
@@ -573,6 +575,8 @@ class Cirxnat:
         >>> print(usability)
         {'1': ['desc':'3Plane Loc  32ch', 'quality':'usable','note': '']}
         """
+        if scan_list is None:
+            scan_list = []
         url = self._get_base_url(f"/{subject_id}/experiments/{experiment_id}/scans")
         payload = {"format": "json"}
         response = self.session.get(url, params=payload).text.rstrip()
@@ -685,7 +689,7 @@ class Cirxnat:
 
         return error
 
-    def get_project_dcm_params(self, scan_list=[], extra_tags={}):
+    def get_project_dcm_params(self, scan_list=None, extra_tags=None):
         """Get DICOM parameter information for all experiments in a project.
 
         Parameters
@@ -717,6 +721,10 @@ class Cirxnat:
         4_WISC_IH_1556_24_11_2015_1 NaN ... NaN
         [5 rows x 79 columns]
         """
+        if extra_tags is None:
+            extra_tags = {}
+        if scan_list is None:
+            scan_list = []
         proj_df = pd.DataFrame()
         experiments = self.print_all_experiments()
         for exp in experiments:
