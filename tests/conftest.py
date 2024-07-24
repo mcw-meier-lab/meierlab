@@ -48,3 +48,29 @@ def example_scan_num():
 @pytest.fixture
 def tests_data_path():
     return os.path.join(os.path.dirname(__file__), "data")
+
+
+@pytest.fixture
+def fake_freesurfer_home(tmp_path):
+    fs_home = tmp_path / "freesurfer"
+    fs_home.mkdir()
+
+    return fs_home
+
+
+@pytest.fixture
+def fake_subjects_dir(tmp_path):
+    subjects_dir = tmp_path / "subjects"
+    subjects_dir.mkdir()
+
+    return subjects_dir
+
+
+@pytest.fixture
+def fake_recon_all(tmp_path, example_subject_id):
+    scripts_dir = tmp_path / "subjects" / example_subject_id / "scripts"
+    scripts_dir.mkdir(parents=True)
+    recon_file = scripts_dir / "recon-all.log"
+    recon_file.write_text("finished without error")
+
+    return
