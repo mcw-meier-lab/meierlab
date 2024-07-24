@@ -21,6 +21,7 @@ Visualization of brain images
 See :ref:`viz` for more details.
 
 
+
 .. raw:: html
 
     <div class="sphx-glr-thumbnails">

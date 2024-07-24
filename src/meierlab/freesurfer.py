@@ -13,11 +13,35 @@ class FreeSurfer:
         self.recon_success = self.check_recon_all()
 
     def get_stats(self, file_name):
+        """Utility function to retrieve a FreeSurfer stats file for processing.
+
+        Parameters
+        ----------
+        file_name : str
+            FreeSurfer stats file to retrieve. Usually ends in ".stats"
+
+        Returns
+        -------
+        :class: `~pathlib.Path`
+            Stats file path
+        """
         stats_file = self.subjects_dir / self.subject_id / "stats" / file_name
 
         return stats_file
 
     def check_recon_all(self):
+        """Verifies that the subject's FreeSurfer recon finished successfully.
+
+        Returns
+        -------
+        bool
+            True if FreeSurfer finished successfully.
+
+        Raises
+        ------
+        Exception
+            Errors if no recon-all file.
+        """
         recon_file = self.subjects_dir / self.subject_id / "scripts/recon-all.log"
 
         if recon_file.exists():

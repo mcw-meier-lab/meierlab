@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "dev", "doc", "lint", "pre-commit", "test"]
+groups = ["default", "dev", "doc", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:7c607e30ea061c8178d0c1437d0fba0801b383624d36c47513fae02c469987e3"
+content_hash = "sha256:53d29f868e5a96fcff2a8f8928d48e70917ad43118f67d1494919ff3abed5c5a"
 
 [[metadata.targets]]
 requires_python = ">=3.9"

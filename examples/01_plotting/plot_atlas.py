@@ -20,7 +20,7 @@ rsn_list = ng.gen_subnetwork_list(G)
 # Visualize the full network
 # --------------------------
 full_connectome = nv.plot_connectome_from_graph(G, atlas_coords)
-full_connectome.show()
+full_connectome  # noqa: B018
 
 ######################################################
 # Visualize a single subnetwork, in this case Visual
@@ -29,7 +29,7 @@ vis = [rsn for rsn in rsn_list if rsn == "Visual"]
 vis_graph = ng.gen_subnetwork_subgraphs(G, vis)
 
 vis = nv.plot_subgraph_connectome(vis_graph[0], atlas_coords)
-vis.show()
+vis  # noqa: B018
 
 ###########################################################
 # Visualize the nodes of a subnetwork, in this case Visual
