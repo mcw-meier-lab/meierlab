@@ -29,7 +29,7 @@ def gen_figs(outlier_df, x_cols, y_cols=None):
     """
     if y_cols is None:
         y_cols = [("pos_count", "neg_count"), ("pos_pct", "neg_pct")]
-    figs = list(zip(x_cols, y_cols))
+    figs = list(zip(x_cols, y_cols, strict=False))
     out_figs = []
     for x, y in figs:
         fig = go.Figure()

@@ -70,7 +70,7 @@ def test_gen_base_graph_from_atlas(G):
         "RH_Default_Temp_7",
         "RH_Default_Temp_8",
     ]
-    assert all([a == e for a, e in zip(actual, expected)])
+    assert all([a == e for a, e in zip(actual, expected, strict=False)])
 
 
 def test_gen_graph_matrix(g):
