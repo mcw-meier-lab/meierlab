@@ -3,8 +3,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from matplotlib import colors
+from nilearn import plotting
 from nipype.interfaces.freesurfer.preprocess import MRIConvert
 from nipype.interfaces.fsl import FLIRT
+from nireports.interfaces.reporting.base import SimpleBeforeAfterRPT
 
 from meierlab.datasets import MNI_NII
 
@@ -27,7 +29,7 @@ def get_FreeSurfer_colormap(freesurfer_home):
     """
     lut = pd.read_csv(
         freesurfer_home / "FreeSurferColorLUT.txt",
-        sep=" ",
+        sep=r"\s+",
         comment="#",
         header=None,
         skipinitialspace=True,
@@ -95,6 +97,13 @@ class FreeSurfer:
             raise Exception("Subject has no recon-all output.")
 
     def gen_tlrc_data(self, output_dir):
+        """Generates inverse talairach data for report generation.
+
+        Parameters
+        ----------
+        output_dir : :class: `~pathlib.Path` or str
+            Path for intermediate file output.
+        """
         if not isinstance(output_dir, Path):
             output_dir = Path(output_dir)
 
@@ -133,3 +142,95 @@ class FreeSurfer:
         flirt.run()
 
         return
+
+    def gen_tlrc_report(self, tlrc_dir, output_dir, gen_data=True):
+        """Generates a before and after report of Talairach registration. (Will also run file generation if needed.)
+
+        Parameters
+        ----------
+        tlrc_dir : :class: `~pathlib.Path` or str
+            Path to output of `gen_tlrc_data`.
+        output_dir : :class: `~pathlib.Path` or str
+            Path to SVG output.
+        gen_data : bool, optional
+            Generate inverse Talairach data, by default True
+
+        Returns
+        -------
+        svg
+            SVG file generated from the niworkflows SimpleBeforeAfterRPT
+        """
+        if not isinstance(output_dir, Path):
+            output_dir = Path(output_dir)
+        if not isinstance(tlrc_dir, Path):
+            tlrc_dir = Path(tlrc_dir)
+
+        mri_dir = self.subjects_dir / self.subject_id / "mri"
+
+        if gen_data:
+            self.gen_tlrc_data(tlrc_dir)
+
+        # use white matter segmentation to compare registrations
+        report = SimpleBeforeAfterRPT(
+            before=mri_dir / "orig.mgz",
+            after=tlrc_dir / "mni2orig.nii.gz",
+            wm_seg=mri_dir / "wm.mgz",
+            before_label="Subject Orig",
+            after_label="Template",
+            out_report=output_dir / "tlrc.svg",
+        )
+        result = report.run()
+        output = result.outputs.out_report
+
+        return output
+
+    def gen_aparcaseg_plots(self, cmap_file, output_dir, num_imgs=None):
+        """Generate parcellation images (aparc & aseg).
+
+        Parameters
+        ----------
+        output_dir : list
+            List of svg files.
+
+        num_imgs : int, optional
+            Number of images/slices to make.
+        """
+        if num_imgs is None:
+            num_imgs = 10
+
+        mri_dir = self.subjects_dir / self.subject_id / "mri"
+        cmap = get_FreeSurfer_colormap(self.home_dir)
+
+        # get parcellation and segmentation images
+        plotting.plot_roi(
+            mri_dir / "aparc+aseg.mgz",
+            mri_dir / "T1.mgz",
+            cmap=cmap,
+            display_mode="mosaic",
+            dim=-1,
+            cut_coords=num_imgs,
+            alpha=0.5,
+            output_file=output_dir / "aseg.svg",
+        )
+        display = plotting.plot_anat(
+            mri_dir / "brainmask.mgz",
+            display_mode="mosaic",
+            cut_coords=num_imgs,
+            dim=-1,
+        )
+        display.add_contours(
+            mri_dir / "lh.ribbon.mgz",
+            colors="b",
+            linewidths=0.5,
+            levels=[0.5],
+        )
+        display.add_contours(
+            mri_dir / "rh.ribbon.mgz",
+            colors="r",
+            linewidths=0.5,
+            levels=[0.5],
+        )
+        display.savefig(output_dir / "aparc.svg")
+        display.close()
+
+        return [Path(output_dir / "aseg.svg"), Path(output_dir / "aparc.svg")]

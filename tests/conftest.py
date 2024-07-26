@@ -1,4 +1,6 @@
 import os
+import shutil
+from pathlib import Path
 
 import pytest
 
@@ -47,7 +49,32 @@ def example_scan_num():
 
 @pytest.fixture
 def tests_data_path():
-    return os.path.join(os.path.dirname(__file__), "data")
+    return Path(os.path.join(os.path.dirname(__file__), "data"))
+
+
+@pytest.fixture
+def orig_mgz(tests_data_path):
+    return tests_data_path / "orig.mgz"
+
+
+@pytest.fixture
+def wm_mgz(tests_data_path):
+    return tests_data_path / "wm.mgz"
+
+
+@pytest.fixture
+def xfm(tests_data_path):
+    return tests_data_path / "talairach.xfm.lta"
+
+
+@pytest.fixture
+def cmap(tests_data_path):
+    return tests_data_path / "FreeSurferColorLUT.txt"
+
+
+@pytest.fixture
+def aparc_aseg_data(tests_data_path):
+    return tests_data_path / "aparc_aseg"
 
 
 @pytest.fixture
@@ -72,5 +99,14 @@ def fake_recon_all(tmp_path, example_subject_id):
     scripts_dir.mkdir(parents=True)
     recon_file = scripts_dir / "recon-all.log"
     recon_file.write_text("finished without error")
+
+    return
+
+
+@pytest.fixture
+def fake_tlrc_data(tmp_path, example_subject_id, xfm):
+    transforms_dir = tmp_path / "subjects" / example_subject_id / "mri/transforms"
+    transforms_dir.mkdir(parents=True)
+    shutil.copy(xfm, transforms_dir)
 
     return
