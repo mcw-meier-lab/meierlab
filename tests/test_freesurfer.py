@@ -2,20 +2,13 @@ import shutil
 from pathlib import Path
 
 import matplotlib
+import pytest
 
 from meierlab.freesurfer import FreeSurfer, get_FreeSurfer_colormap
 
 
-def test_get_FreeSurfer_colormap(fake_freesurfer_home):
-    lut_file = fake_freesurfer_home / "FreeSurferColorLUT.txt"
-    lut_file.write_text("""\n
-#No. Label Name:                            R   G   B   A
-
-0   Unknown                                 0   0   0   0
-1   LCE                  70  130 180 0
-2   LCWM              245 245 245 0
-3   LCC                    205 62  78  0
-""")
+def test_get_FreeSurfer_colormap(fake_freesurfer_home, cmap):
+    shutil.copy(cmap, fake_freesurfer_home)
     assert isinstance(
         get_FreeSurfer_colormap(fake_freesurfer_home), matplotlib.colors.ListedColormap
     )
@@ -105,3 +98,24 @@ def test_gen_tlrc_report(
         fs_dir.gen_tlrc_report(tlrc_dir=transforms_dir, output_dir=fake_subjects_dir)
     )
     assert output.exists()
+
+
+@pytest.mark.filterwarnings("ignore::UserWarning")
+def test_gen_aparcaseg_plots(
+    cmap,
+    fake_freesurfer_home,
+    fake_subjects_dir,
+    example_subject_id,
+    fake_recon_all,
+    aparc_aseg_data,
+):
+    shutil.copy(cmap, fake_freesurfer_home)
+    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
+    mri_dir = fake_subjects_dir / f"{example_subject_id}/mri"
+    mri_dir.mkdir(parents=True, exist_ok=True)
+    for mgz in aparc_aseg_data.glob("*mgz"):
+        shutil.copy(mgz, mri_dir / mgz.name)
+
+    imgs = fs_dir.gen_aparcaseg_plots(cmap, mri_dir)
+    assert len(imgs) > 0
+    assert imgs[0].exists()

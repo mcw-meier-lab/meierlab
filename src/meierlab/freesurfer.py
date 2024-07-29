@@ -3,10 +3,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from matplotlib import colors
+from nilearn import plotting
 from nipype.interfaces.freesurfer.preprocess import MRIConvert
 from nipype.interfaces.fsl import FLIRT
-
-# from niworkflows.interfaces.reportlets.registration import SimpleBeforeAfterRPT
 from nireports.interfaces.reporting.base import SimpleBeforeAfterRPT
 
 from meierlab.datasets import MNI_NII
@@ -30,7 +29,7 @@ def get_FreeSurfer_colormap(freesurfer_home):
     """
     lut = pd.read_csv(
         freesurfer_home / "FreeSurferColorLUT.txt",
-        sep=" ",
+        sep=r"\s+",
         comment="#",
         header=None,
         skipinitialspace=True,
@@ -184,3 +183,54 @@ class FreeSurfer:
         output = result.outputs.out_report
 
         return output
+
+    def gen_aparcaseg_plots(self, cmap_file, output_dir, num_imgs=None):
+        """Generate parcellation images (aparc & aseg).
+
+        Parameters
+        ----------
+        output_dir : list
+            List of svg files.
+
+        num_imgs : int, optional
+            Number of images/slices to make.
+        """
+        if num_imgs is None:
+            num_imgs = 10
+
+        mri_dir = self.subjects_dir / self.subject_id / "mri"
+        cmap = get_FreeSurfer_colormap(self.home_dir)
+
+        # get parcellation and segmentation images
+        plotting.plot_roi(
+            mri_dir / "aparc+aseg.mgz",
+            mri_dir / "T1.mgz",
+            cmap=cmap,
+            display_mode="mosaic",
+            dim=-1,
+            cut_coords=num_imgs,
+            alpha=0.5,
+            output_file=output_dir / "aseg.svg",
+        )
+        display = plotting.plot_anat(
+            mri_dir / "brainmask.mgz",
+            display_mode="mosaic",
+            cut_coords=num_imgs,
+            dim=-1,
+        )
+        display.add_contours(
+            mri_dir / "lh.ribbon.mgz",
+            colors="b",
+            linewidths=0.5,
+            levels=[0.5],
+        )
+        display.add_contours(
+            mri_dir / "rh.ribbon.mgz",
+            colors="r",
+            linewidths=0.5,
+            levels=[0.5],
+        )
+        display.savefig(output_dir / "aparc.svg")
+        display.close()
+
+        return [Path(output_dir / "aseg.svg"), Path(output_dir / "aparc.svg")]

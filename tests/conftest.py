@@ -68,6 +68,16 @@ def xfm(tests_data_path):
 
 
 @pytest.fixture
+def cmap(tests_data_path):
+    return tests_data_path / "FreeSurferColorLUT.txt"
+
+
+@pytest.fixture
+def aparc_aseg_data(tests_data_path):
+    return tests_data_path / "aparc_aseg"
+
+
+@pytest.fixture
 def fake_freesurfer_home(tmp_path):
     fs_home = tmp_path / "freesurfer"
     fs_home.mkdir()
