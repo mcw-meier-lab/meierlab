@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from matplotlib import colors
+from matplotlib import pyplot as plt
 from nilearn import plotting
 from nipype.interfaces.freesurfer.preprocess import MRIConvert
 from nipype.interfaces.fsl import FLIRT
@@ -184,7 +185,7 @@ class FreeSurfer:
 
         return output
 
-    def gen_aparcaseg_plots(self, cmap_file, output_dir, num_imgs=None):
+    def gen_aparcaseg_plots(self, output_dir, num_imgs=None):
         """Generate parcellation images (aparc & aseg).
 
         Parameters
@@ -234,3 +235,109 @@ class FreeSurfer:
         display.close()
 
         return [Path(output_dir / "aseg.svg"), Path(output_dir / "aparc.svg")]
+
+    def gen_surf_plots(self, output_dir):
+        """
+
+        Parameters
+        ----------
+        cmap_file : _type_
+            _description_
+        output_dir : _type_
+            _description_
+        """
+
+        surf_dir = self.subjects_dir / self.subject_id / "surf"
+        label_dir = self.subjects_dir / self.subject_id / "label"
+        cmap = get_FreeSurfer_colormap(self.home_dir)
+
+        hemis = {"lh": "left", "rh": "right"}
+        for key, val in hemis.items():
+            pial = surf_dir / f"{key}.pial"
+            inflated = surf_dir / f"{key}.inflated"
+            sulc = surf_dir / f"{key}.sulc"
+            white = surf_dir / f"{key}.white"
+            annot = label_dir / f"{key}.aparc.annot"
+
+            label_files = {pial: "pial", inflated: "infl", white: "white"}
+
+            for surf, label in label_files.items():
+                fig, axs = plt.subplots(2, 3, subplot_kw={"projection": "3d"})
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="lateral",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 0],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="medial",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 1],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="dorsal",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 2],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="ventral",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 0],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="anterior",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 1],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="posterior",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 2],
+                    figure=fig,
+                )
+
+                plt.savefig(output_dir / f"{key}_{label}.svg", dpi=300, format="svg")
+                plt.close()
+
+        imgs = sorted(Path(output_dir).glob("*svg"))
+        return imgs

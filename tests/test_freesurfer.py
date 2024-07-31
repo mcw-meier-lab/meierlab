@@ -116,6 +116,34 @@ def test_gen_aparcaseg_plots(
     for mgz in aparc_aseg_data.glob("*mgz"):
         shutil.copy(mgz, mri_dir / mgz.name)
 
-    imgs = fs_dir.gen_aparcaseg_plots(cmap, mri_dir)
+    imgs = fs_dir.gen_aparcaseg_plots(mri_dir)
+    assert len(imgs) > 0
+    assert imgs[0].exists()
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+def test_gen_surf_plots(
+    cmap,
+    fake_freesurfer_home,
+    fake_subjects_dir,
+    example_subject_id,
+    fake_recon_all,
+    surf_data,
+    label_data,
+):
+    shutil.copy(cmap, fake_freesurfer_home)
+    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
+
+    surf_dir = fake_subjects_dir / f"{example_subject_id}/surf"
+    surf_dir.mkdir(parents=True, exist_ok=True)
+    for f1 in surf_data.glob("*"):
+        shutil.copy(f1, surf_dir / f1.name)
+
+    label_dir = fake_subjects_dir / f"{example_subject_id}/label"
+    label_dir.mkdir()
+    for f1 in label_data.glob("*"):
+        shutil.copy(f1, label_dir / f1.name)
+
+    imgs = fs_dir.gen_surf_plots(surf_dir)
     assert len(imgs) > 0
     assert imgs[0].exists()
