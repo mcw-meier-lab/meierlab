@@ -159,3 +159,5 @@ examples/results/
 examples/*nii
 examples/*nii.gz
 examples/*.png
+
+tests/data/
