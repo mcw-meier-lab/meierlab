@@ -1,14 +1,18 @@
+import datetime
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from matplotlib import colors
+from matplotlib import pyplot as plt
 from nilearn import plotting
 from nipype.interfaces.freesurfer.preprocess import MRIConvert
 from nipype.interfaces.fsl import FLIRT
 from nireports.interfaces.reporting.base import SimpleBeforeAfterRPT
 
 from meierlab.datasets import MNI_NII
+from meierlab.reports import Template
 
 
 def get_FreeSurfer_colormap(freesurfer_home):
@@ -53,6 +57,9 @@ class FreeSurfer:
         self.subjects_dir = Path(subjects_dir)
         self.subject_id = subject_id
         self.recon_success = self.check_recon_all()
+
+    def get_data_dir(self):
+        return self.subjects_dir / self.subject_id
 
     def get_stats(self, file_name):
         """Utility function to retrieve a FreeSurfer stats file for processing.
@@ -184,7 +191,7 @@ class FreeSurfer:
 
         return output
 
-    def gen_aparcaseg_plots(self, cmap_file, output_dir, num_imgs=None):
+    def gen_aparcaseg_plots(self, output_dir, num_imgs=None):
         """Generate parcellation images (aparc & aseg).
 
         Parameters
@@ -234,3 +241,168 @@ class FreeSurfer:
         display.close()
 
         return [Path(output_dir / "aseg.svg"), Path(output_dir / "aparc.svg")]
+
+    def gen_surf_plots(self, output_dir):
+        """Generates pial, inflated, and sulcal images from various viewpoints
+
+        Parameters
+        ----------
+        output_dir : path or str representing a path to a directory
+            Surface plot output directory.
+
+        Returns
+        -------
+        list
+            List of generated SVG images
+        """
+
+        surf_dir = self.subjects_dir / self.subject_id / "surf"
+        label_dir = self.subjects_dir / self.subject_id / "label"
+        cmap = get_FreeSurfer_colormap(self.home_dir)
+
+        hemis = {"lh": "left", "rh": "right"}
+        for key, val in hemis.items():
+            pial = surf_dir / f"{key}.pial"
+            inflated = surf_dir / f"{key}.inflated"
+            sulc = surf_dir / f"{key}.sulc"
+            white = surf_dir / f"{key}.white"
+            annot = label_dir / f"{key}.aparc.annot"
+
+            label_files = {pial: "pial", inflated: "infl", white: "white"}
+
+            for surf, label in label_files.items():
+                fig, axs = plt.subplots(2, 3, subplot_kw={"projection": "3d"})
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="lateral",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 0],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="medial",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 1],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="dorsal",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[0, 2],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="ventral",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 0],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="anterior",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 1],
+                    figure=fig,
+                )
+                plotting.plot_surf_roi(
+                    surf,
+                    annot,
+                    hemi=val,
+                    view="posterior",
+                    bg_map=sulc,
+                    bg_on_data=True,
+                    darkness=1,
+                    cmap=cmap,
+                    axes=axs[1, 2],
+                    figure=fig,
+                )
+
+                plt.savefig(output_dir / f"{key}_{label}.svg", dpi=300, format="svg")
+                plt.close()
+
+        imgs = sorted(Path(output_dir).glob("*svg"))
+        return imgs
+
+    def gen_report(self, out_name, output_dir, template=None):
+        """Generate html report with FreeSurfer images.
+
+        Parameters
+        ----------
+        out_name : str
+            HTML file name
+        output_dir : path or str representing path to a directory
+            Location where html file will be output.
+        template : str, optional
+            HTML template to use. Default is local freesurfer.html.
+        """
+        if template is None:
+            template = Path(
+                os.path.join(os.path.dirname(__file__), "html/freesurfer.html")
+            )
+        data_dir = self.get_data_dir()
+        image_list = data_dir.glob("*/*svg")
+
+        tlrc = []
+        aseg = []
+        surf = []
+
+        for img in image_list:
+            with open(img) as img_file:
+                img_data = img_file.read()
+
+            if "tlrc" in img:
+                tlrc.append(img_data)
+            elif "aseg" in img or "aparc" in img:
+                aseg.append(img_data)
+            else:
+                labels = {
+                    "lh_pial": "LH Pial",
+                    "rh_pial": "RH Pial",
+                    "lh_infl": "LH Inflated",
+                    "rh_infl": "RH Inflated",
+                    "lh_white": "LH White Matter",
+                    "rh_white": "RH White Matter",
+                }
+                surf_tuple = (labels[img.name], img_data)
+                surf.append(surf_tuple)
+
+        _config = {
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d, %H:%M"),
+            "subject": self.subject_id,
+            "tlrc": tlrc,
+            "aseg": aseg,
+            "surf": surf,
+        }
+
+        tpl = Template(str(template))
+        tpl.generate_conf(_config, output_dir / out_name)
+
+        return Path(output_dir / out_name)

@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib
 import pytest
 
-from meierlab.freesurfer import FreeSurfer, get_FreeSurfer_colormap
+from meierlab.quality.freesurfer import FreeSurfer, get_FreeSurfer_colormap
 
 
 def test_get_FreeSurfer_colormap(fake_freesurfer_home, cmap):
@@ -25,6 +25,14 @@ def test_get_stats(
     fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
 
     assert fs_dir.get_stats("aseg.stats").exists()
+
+
+def test_get_data_dir(
+    fake_freesurfer_home, fake_subjects_dir, fake_recon_all, example_subject_id
+):
+    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
+    data_dir = fake_subjects_dir / example_subject_id
+    assert fs_dir.get_data_dir() == data_dir
 
 
 def test_check_recon_all_success(
@@ -116,6 +124,43 @@ def test_gen_aparcaseg_plots(
     for mgz in aparc_aseg_data.glob("*mgz"):
         shutil.copy(mgz, mri_dir / mgz.name)
 
-    imgs = fs_dir.gen_aparcaseg_plots(cmap, mri_dir)
+    imgs = fs_dir.gen_aparcaseg_plots(mri_dir)
     assert len(imgs) > 0
     assert imgs[0].exists()
+
+
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+def test_gen_surf_plots(
+    cmap,
+    fake_freesurfer_home,
+    fake_subjects_dir,
+    example_subject_id,
+    fake_recon_all,
+    surf_data,
+    label_data,
+):
+    shutil.copy(cmap, fake_freesurfer_home)
+    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
+
+    surf_dir = fake_subjects_dir / f"{example_subject_id}/surf"
+    surf_dir.mkdir(parents=True, exist_ok=True)
+    for f1 in surf_data.glob("*"):
+        shutil.copy(f1, surf_dir / f1.name)
+
+    label_dir = fake_subjects_dir / f"{example_subject_id}/label"
+    label_dir.mkdir()
+    for f1 in label_data.glob("*"):
+        shutil.copy(f1, label_dir / f1.name)
+
+    imgs = fs_dir.gen_surf_plots(surf_dir)
+    assert len(imgs) > 0
+    assert imgs[0].exists()
+
+
+def test_gen_report(
+    fake_freesurfer_home, fake_subjects_dir, example_subject_id, fake_recon_all
+):
+    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
+
+    html_file = fs_dir.gen_report("example.html", fake_subjects_dir)
+    assert html_file.exists()

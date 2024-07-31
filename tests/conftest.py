@@ -78,6 +78,16 @@ def aparc_aseg_data(tests_data_path):
 
 
 @pytest.fixture
+def surf_data(tests_data_path):
+    return tests_data_path / "surf"
+
+
+@pytest.fixture
+def label_data(tests_data_path):
+    return tests_data_path / "label"
+
+
+@pytest.fixture
 def fake_freesurfer_home(tmp_path):
     fs_home = tmp_path / "freesurfer"
     fs_home.mkdir()
