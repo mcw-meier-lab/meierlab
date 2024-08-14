@@ -57,8 +57,16 @@ class FreeSurfer:
         self.subjects_dir = Path(subjects_dir)
         self.subject_id = subject_id
         self.recon_success = self.check_recon_all()
+        self.data_dir = self.get_data_dir()
 
     def get_data_dir(self):
+        """Small utility function to set the subject's data directory.
+
+        Returns
+        -------
+        :class: `~pathlib:Path`
+            Subject's FreeSurfer data directory path.
+        """
         return self.subjects_dir / self.subject_id
 
     def get_stats(self, file_name):
@@ -73,8 +81,14 @@ class FreeSurfer:
         -------
         :class: `~pathlib.Path`
             Stats file path
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> aseg = fs_dir.get_stats('aseg.stats')
         """
-        stats_file = self.subjects_dir / self.subject_id / "stats" / file_name
+        stats_file = self.data_dir / "stats" / file_name
 
         return stats_file
 
@@ -91,7 +105,7 @@ class FreeSurfer:
         Exception
             Errors if no recon-all file.
         """
-        recon_file = self.subjects_dir / self.subject_id / "scripts/recon-all.log"
+        recon_file = self.data_dir / "scripts/recon-all.log"
 
         if recon_file.exists():
             with open(recon_file) as reconall:
@@ -110,14 +124,19 @@ class FreeSurfer:
         ----------
         output_dir : :class: `~pathlib.Path` or str
             Path for intermediate file output.
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> fs_dir.gen_tlrc_data('.')
         """
+
         if not isinstance(output_dir, Path):
             output_dir = Path(output_dir)
 
         # get inverse transform
-        lta_file = (
-            self.subjects_dir / self.subject_id / "mri/transforms/talairach.xfm.lta"
-        )
+        lta_file = self.data_dir / "mri/transforms/talairach.xfm.lta"
         xfm = np.genfromtxt(lta_file, skip_header=5, max_rows=4)
         inverse_xfm = np.linalg.inv(xfm)
         np.savetxt(
@@ -131,7 +150,7 @@ class FreeSurfer:
 
         # convert subject original T1 to nifti (for FSL)
         convert = MRIConvert(
-            in_file=Path(self.subjects_dir, self.subject_id, "mri") / "orig.mgz",
+            in_file=Path(self.data_dir, "mri") / "orig.mgz",
             out_file=output_dir / "orig.nii.gz",
             out_type="niigz",
         )
@@ -150,29 +169,37 @@ class FreeSurfer:
 
         return
 
-    def gen_tlrc_report(self, tlrc_dir, output_dir, gen_data=True):
+    def gen_tlrc_report(self, output_dir, gen_data=True, tlrc_dir=None):
         """Generates a before and after report of Talairach registration. (Will also run file generation if needed.)
 
         Parameters
         ----------
-        tlrc_dir : :class: `~pathlib.Path` or str
-            Path to output of `gen_tlrc_data`.
         output_dir : :class: `~pathlib.Path` or str
             Path to SVG output.
         gen_data : bool, optional
             Generate inverse Talairach data, by default True
+        tlrc_dir : :class: `~pathlib.Path` or str, optional
+            Path to output of `gen_tlrc_data`. Default is the subject's mri/transforms directory.
 
         Returns
         -------
         svg
             SVG file generated from the niworkflows SimpleBeforeAfterRPT
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> report = fs_dir.gen_tlrc_report(output_dir='.')
         """
+        if tlrc_dir is None:
+            tlrc_dir = self.data_dir / "mri/transforms"
         if not isinstance(output_dir, Path):
             output_dir = Path(output_dir)
         if not isinstance(tlrc_dir, Path):
             tlrc_dir = Path(tlrc_dir)
 
-        mri_dir = self.subjects_dir / self.subject_id / "mri"
+        mri_dir = self.data_dir / "mri"
 
         if gen_data:
             self.gen_tlrc_data(tlrc_dir)
@@ -196,16 +223,26 @@ class FreeSurfer:
 
         Parameters
         ----------
-        output_dir : list
-            List of svg files.
-
+        output_dir : :class: `~pathlib.Path` or str
+            Path or str representing path to output directory.
         num_imgs : int, optional
             Number of images/slices to make.
+
+        Returns
+        -------
+        list
+            List of image paths
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> images = fs_dir.gen_aparcaseg_plots('.')
         """
         if num_imgs is None:
             num_imgs = 10
 
-        mri_dir = self.subjects_dir / self.subject_id / "mri"
+        mri_dir = self.data_dir / "mri"
         cmap = get_FreeSurfer_colormap(self.home_dir)
 
         # get parcellation and segmentation images
@@ -254,6 +291,12 @@ class FreeSurfer:
         -------
         list
             List of generated SVG images
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> images = fs_dir.gen_surf_plots('.')
         """
 
         surf_dir = self.subjects_dir / self.subject_id / "surf"
@@ -362,6 +405,17 @@ class FreeSurfer:
             Location where html file will be output.
         template : str, optional
             HTML template to use. Default is local freesurfer.html.
+
+        Returns
+        -------
+        :class: `~pathlib.Path`
+            Path to html file.
+
+        Examples
+        --------
+        >>> from meierlab.quality.freesurfer import FreeSurfer
+        >>> fs_dir = FreeSurfer(home_dir='/opt/freesurfer', subjects_dir='/opt/data', subject_id='sub-001')
+        >>> report = fs_dir.gen_report(out_name='sub-001.html',output_dir='.')
         """
         if template is None:
             template = Path(
