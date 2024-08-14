@@ -50,9 +50,9 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 License
 -------
 
-Copyright (c) 2023, MCW Meier-Lab.
+Copyright (c) 2023-2024, MCW Meier-Lab.
 ``meierlab`` was created by Lezlie España as part of the MCW Meier Lab.
-It is licensed under the BSD 3-Clause License.
+It is licensed under the Apache 2.0 License.
 
 
 Credits

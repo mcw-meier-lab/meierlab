@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "meierlab"
-copyright = "2023, MCW-Meier-Lab"
+copyright = "2023-2024, MCW Meier Lab"
 author = "MCW Meier Lab team"
 
 # -- General configuration ---------------------------------------------------
