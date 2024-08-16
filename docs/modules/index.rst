@@ -16,3 +16,4 @@ the :ref:`user guide <user_guide>` for more information and usage examples.
    postproc.rst
    preproc.rst
    viz.rst
+   quality.rst

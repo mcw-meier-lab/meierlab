@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="MRIQC" />
+<title>FreeSurfer: Individual Report</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<style type="text/css">
+body {
+  font-family: helvetica;
+  padding: 50px 10px 10px;
+}
+
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+}
+
+span.problematic {
+  color: red;
+  font-weight: bold ;
+}
+
+p.label {
+  white-space: nowrap }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+div.embeded-report {
+  width: 100%;
+  page-break-before:always;
+  padding-top: 20px;
+}
+
+div.embeded-report svg { width: 100%; }
+
+div#accordionOther {
+    margin: 0 20px;
+}
+
+.add-padding {
+    padding-top: 15px;
+}
+
+#report-qi2-fitting {
+    max-width: 450px;
+}
+
+</style>
+</head>
+<body>
+<div class="document">
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+<div class="collapse navbar-collapse">
+    <ul class="navbar-nav">
+      <li class="nav-item"><a class="nav-link" href="#summary">Summary</a></li>
+      <li class="nav-item"><a class="nav-link" href="#tlrc">Talairach Registration</a></li>
+      <li class="nav-item"><a class="nav-link" href="#aseg">Aparc+Aseg Parcellations</a></li>
+      <li class="nav-item"><a class="nav-link" href="#surf">Surfaces</a></li>
+    </ul>
+</div>
+</nav>
+<noscript>
+    <h1 class="text-danger"> The navigation menu uses Javascript. Without it this report might not work as expected </h1>
+</noscript>
+
+<h1 class="mt-5 mb-5">FreeSurfer: Individual Report</h1>
+
+<div class="card mt-3" style="width: 480pt;">
+    <h2 id="summary" class="card-header">Summary</h2>
+    <div class="card-body">
+        <ul class="simple">
+        <li>Date and time: {{ timestamp }}.</li>
+        </ul>
+    </div>
+</div>
+
+<h2 id="tlrc" class="mt-5 mb-2">Talairach Registration</h2>
+{% for tag in tlrc %}
+    <div class="card mt-2">
+        <div id="report-tlrc" class="card-body">
+        {{ tag }}
+        </div>
+    </div>
+{% endfor %}
+
+<h2 id="aseg" class="mt-5 mb-2">Aparc+Aseg Parcellations</h2>
+{% for tag in aseg %}
+    <div class="card mt-2">
+        <div id="report-aseg" class="card-body">
+        {{ tag }}
+        </div>
+    </div>
+{% endfor %}
+
+<h2 id="surf" class="mt-5 mb-2">Surfaces</h2>
+{% for label, tag in surf %}
+    <div class="card mt-2">
+        <h4 id="surf" class="mt-5 mb-2">{{ label }}</h4>
+        <div id="report-{{ label }}" class="card-body">
+        {{ tag }}
+        </div>
+    </div>
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+</body>
+</html>
