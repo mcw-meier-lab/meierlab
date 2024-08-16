@@ -27,14 +27,6 @@ def test_get_stats(
     assert fs_dir.get_stats("aseg.stats").exists()
 
 
-def test_get_data_dir(
-    fake_freesurfer_home, fake_subjects_dir, fake_recon_all, example_subject_id
-):
-    fs_dir = FreeSurfer(fake_freesurfer_home, fake_subjects_dir, example_subject_id)
-    data_dir = fake_subjects_dir / example_subject_id
-    assert fs_dir.get_data_dir() == data_dir
-
-
 def test_check_recon_all_success(
     fake_freesurfer_home, fake_subjects_dir, example_subject_id
 ):

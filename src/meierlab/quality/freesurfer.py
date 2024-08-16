@@ -56,18 +56,8 @@ class FreeSurfer:
         self.home_dir = Path(home_dir)
         self.subjects_dir = Path(subjects_dir)
         self.subject_id = subject_id
+        self.data_dir = self.subjects_dir / self.subject_id
         self.recon_success = self.check_recon_all()
-        self.data_dir = self.get_data_dir()
-
-    def get_data_dir(self):
-        """Small utility function to set the subject's data directory.
-
-        Returns
-        -------
-        :class: `~pathlib:Path`
-            Subject's FreeSurfer data directory path.
-        """
-        return self.subjects_dir / self.subject_id
 
     def get_stats(self, file_name):
         """Utility function to retrieve a FreeSurfer stats file for processing.
@@ -299,8 +289,8 @@ class FreeSurfer:
         >>> images = fs_dir.gen_surf_plots('.')
         """
 
-        surf_dir = self.subjects_dir / self.subject_id / "surf"
-        label_dir = self.subjects_dir / self.subject_id / "label"
+        surf_dir = self.data_dir / "surf"
+        label_dir = self.data_dir / "label"
         cmap = get_FreeSurfer_colormap(self.home_dir)
 
         hemis = {"lh": "left", "rh": "right"}
@@ -394,7 +384,7 @@ class FreeSurfer:
         imgs = sorted(Path(output_dir).glob("*svg"))
         return imgs
 
-    def gen_report(self, out_name, output_dir, template=None):
+    def gen_report(self, out_name, output_dir, img_out=None, template=None):
         """Generate html report with FreeSurfer images.
 
         Parameters
@@ -403,6 +393,8 @@ class FreeSurfer:
             HTML file name
         output_dir : path or str representing path to a directory
             Location where html file will be output.
+        img_out : path or str representing path to a directory, optional
+            Location where SVG images are saved, default is subject's data directory.
         template : str, optional
             HTML template to use. Default is local freesurfer.html.
 
@@ -421,8 +413,10 @@ class FreeSurfer:
             template = Path(
                 os.path.join(os.path.dirname(__file__), "html/freesurfer.html")
             )
-        data_dir = self.get_data_dir()
-        image_list = data_dir.glob("*/*svg")
+        if img_out is None:
+            image_list = list(self.data_dir.glob("*/*svg"))
+        else:
+            image_list = list(Path(img_out).glob("*svg"))
 
         tlrc = []
         aseg = []
@@ -432,9 +426,9 @@ class FreeSurfer:
             with open(img) as img_file:
                 img_data = img_file.read()
 
-            if "tlrc" in img:
+            if "tlrc" in img.name:
                 tlrc.append(img_data)
-            elif "aseg" in img or "aparc" in img:
+            elif "aseg" in img.name or "aparc" in img.name:
                 aseg.append(img_data)
             else:
                 labels = {
@@ -445,7 +439,7 @@ class FreeSurfer:
                     "lh_white": "LH White Matter",
                     "rh_white": "RH White Matter",
                 }
-                surf_tuple = (labels[img.name], img_data)
+                surf_tuple = (labels[img.stem], img_data)
                 surf.append(surf_tuple)
 
         _config = {
