@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import pytest
 from meierlab.quality.freesurfer import FreeSurfer, get_FreeSurfer_colormap
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_get_FreeSurfer_colormap(fake_freesurfer_home, cmap):
     shutil.copy(cmap, fake_freesurfer_home)
     assert isinstance(
@@ -14,6 +16,7 @@ def test_get_FreeSurfer_colormap(fake_freesurfer_home, cmap):
     )
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_get_stats(
     fake_freesurfer_home, fake_subjects_dir, fake_recon_all, example_subject_id
 ):
@@ -27,6 +30,7 @@ def test_get_stats(
     assert fs_dir.get_stats("aseg.stats").exists()
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_check_recon_all_success(
     fake_freesurfer_home, fake_subjects_dir, example_subject_id
 ):
@@ -41,6 +45,7 @@ def test_check_recon_all_success(
     assert fs_dir.recon_success
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_check_recon_all_failure(
     fake_freesurfer_home, fake_subjects_dir, example_subject_id
 ):
@@ -55,6 +60,7 @@ def test_check_recon_all_failure(
     assert not fs_dir.recon_success
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_gen_tlrc_data(
     fake_freesurfer_home,
     fake_subjects_dir,
@@ -78,6 +84,7 @@ def test_gen_tlrc_data(
     assert mni2orig.exists()
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_gen_tlrc_report(
     fake_freesurfer_home,
     fake_subjects_dir,
@@ -100,6 +107,7 @@ def test_gen_tlrc_report(
     assert output.exists()
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_gen_aparcaseg_plots(
     cmap,
@@ -121,6 +129,7 @@ def test_gen_aparcaseg_plots(
     assert imgs[0].exists()
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_gen_surf_plots(
     cmap,
@@ -149,6 +158,7 @@ def test_gen_surf_plots(
     assert imgs[0].exists()
 
 
+@pytest.mark.skipif("FREESURFER_HOME" not in os.environ, reason="No FreeSurfer")
 def test_gen_report(
     fake_freesurfer_home, fake_subjects_dir, example_subject_id, fake_recon_all
 ):
