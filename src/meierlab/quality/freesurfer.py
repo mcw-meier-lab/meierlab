@@ -2,17 +2,20 @@ import datetime
 import os
 from pathlib import Path
 
+import nest_asyncio
 import numpy as np
 import pandas as pd
 from matplotlib import colors
 from matplotlib import pyplot as plt
 from nilearn import plotting
-from nipype.interfaces.freesurfer.preprocess import MRIConvert
-from nipype.interfaces.fsl import FLIRT
 from nireports.interfaces.reporting.base import SimpleBeforeAfterRPT
+from pydra import ShellCommandTask, Submitter
+from pydra.engine.specs import ShellSpec, SpecInfo
 
 from meierlab.datasets import MNI_NII
 from meierlab.reports import Template
+
+nest_asyncio.apply()
 
 
 def get_FreeSurfer_colormap(freesurfer_home):
@@ -139,23 +142,96 @@ class FreeSurfer:
         )
 
         # convert subject original T1 to nifti (for FSL)
-        convert = MRIConvert(
+        mriconvert_info_spec = SpecInfo(
+            name="Input",
+            fields=[
+                (
+                    "in_file",
+                    Path,
+                    {
+                        "help_string": "input file ...",
+                        "position": 2,
+                        "mandatory": True,
+                        "argstr": "--input_volume",
+                    },
+                ),
+                (
+                    "out_file",
+                    Path,
+                    {
+                        "help_string": "name of output...",
+                        "position": 3,
+                        "argstr": "--output_volume",
+                    },
+                ),
+                (
+                    "out_type",
+                    str,
+                    {
+                        "help_string": "type of output...",
+                        "position": 1,
+                        "argstr": "--out_type",
+                    },
+                ),
+            ],
+            bases=(ShellSpec,),
+        )
+        convert = ShellCommandTask(
+            name="convert",
+            executable="mri_convert",
             in_file=Path(self.data_dir, "mri") / "orig.mgz",
             out_file=output_dir / "orig.nii.gz",
-            out_type="niigz",
+            out_type="nii",
+            input_spec=mriconvert_info_spec,
         )
-        convert.run()
+        print(convert.cmdline)
+
+        with Submitter(plugin="cf") as sub:
+            sub(convert)
 
         # use FSL to convert template file to subject original space
-        flirt = FLIRT(
+        flirt_info_spec = SpecInfo(
+            name="Input",
+            fields=[
+                ("in_file", Path, {"help_string": "input file", "argstr": "-in"}),
+                (
+                    "reference",
+                    Path,
+                    {"help_string": "reference file", "argstr": "-ref"},
+                ),
+                ("out_file", Path, {"help_string": "output name", "argstr": "-out"}),
+                (
+                    "in_matrix_file",
+                    Path,
+                    {"help_string": "matrix file", "argstr": "-init"},
+                ),
+                (
+                    "apply_xfm",
+                    bool,
+                    {"help_string": "transform to apply", "argstr": "-applyxfm"},
+                ),
+                (
+                    "out_matrix_file",
+                    Path,
+                    {"help_string": "output matrix file", "argstr": "-omat"},
+                ),
+            ],
+            bases=(ShellSpec,),
+        )
+        flirt = ShellCommandTask(
+            name="flirt",
+            executable="flirt",
             in_file=MNI_NII,
             reference=output_dir / "orig.nii.gz",
             out_file=output_dir / "mni2orig.nii.gz",
             in_matrix_file=output_dir / "inv.xfm",
             apply_xfm=True,
             out_matrix_file=output_dir / "out.mat",
+            input_spec=flirt_info_spec,
         )
-        flirt.run()
+
+        with Submitter(plugin="cf") as sub:
+            sub(flirt)
 
         return
 

@@ -11,13 +11,14 @@ dependencies = [
     "nilearn>=0.10.1",
     "numpy>=1.25.2",
     "nibabel>=5.1.0",
-    "nipype>=1.8.6",
     "networkx>=3.1",
     "plotly>=5.16.1",
     "dash>=2.13.0",
     "jupyter-dash>=0.4.2",
     "matplotlib>=3.8.2",
     "nireports>=23.2.1",
+    "pydra>=0.23",
+    "pydra-nipype1>=0.3.0",
 ]
 requires-python = ">=3.10"
 readme = "README.rst"

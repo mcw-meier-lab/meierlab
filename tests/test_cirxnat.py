@@ -3,23 +3,22 @@ import os
 import pandas as pd
 import pytest
 
+pytestmark = pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
+
+# @pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_user(example_server):
     assert example_server.get_user() == "lespana"
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_project(example_server):
     assert example_server.get_project() == "CIRXNAT2"
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_address(example_server):
     assert example_server.get_address() == "https://cirxnat2.rcc.mcw.edu"
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_subjects_json(example_server):
     assert example_server.get_subjects_json()[0] == {
         "insert_date": "2023-09-27 17:31:21.352",
@@ -31,7 +30,6 @@ def test_get_subjects_json(example_server):
     }
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_experiments_json(example_server, example_subject_id):
     assert example_server.get_experiments_json(example_subject_id) == [
         {
@@ -47,7 +45,6 @@ def test_get_experiments_json(example_server, example_subject_id):
     ]
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_json(example_server, example_subject_id, example_experiment_id):
     assert example_server.get_scans_json(example_subject_id, example_experiment_id)[
         0
@@ -63,7 +60,6 @@ def test_get_scans_json(example_server, example_subject_id, example_experiment_i
     }
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_dictionary(
     example_server,
     example_subject_id,
@@ -86,7 +82,6 @@ def test_get_scans_dictionary(
     }
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_print_all_experiments(example_server):
     assert example_server.print_all_experiments() == [
         {
@@ -101,7 +96,6 @@ def test_print_all_experiments(example_server):
     ]
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_dicom_header(
     example_server,
     example_experiment_id,
@@ -112,7 +106,6 @@ def test_get_dicom_header(
     )
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_dicom_tag(
     example_server,
     example_subject_id,
@@ -142,7 +135,6 @@ def test_get_dicom_tag(
     )
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_scans_usability(
     example_server,
     example_subject_id,
@@ -165,7 +157,6 @@ def test_get_scans_usability(
     }
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_experiment_note_json(
     example_server,
     example_subject_id,
@@ -192,7 +183,6 @@ def test_get_experiment_note_json(
     }
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 @pytest.mark.download
 def test_zip_scan_descriptions_to_file_success(
     example_server,
@@ -211,7 +201,6 @@ def test_zip_scan_descriptions_to_file_success(
     os.remove("test_file.zip")
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 @pytest.mark.download
 def test_zip_scan_description_to_file_fail(
     example_server,
@@ -239,6 +228,5 @@ def test_zip_scan_description_to_file_fail(
     )
 
 
-@pytest.mark.skipif("CIR2" not in os.environ, reason="local testing only")
 def test_get_project_dcm_params(example_server):
     assert isinstance(example_server.get_project_dcm_params()) == pd.DataFrame

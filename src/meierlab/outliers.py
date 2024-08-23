@@ -4,6 +4,7 @@ import pandas as pd
 from nibabel import Nifti1Image, load, save
 from nilearn.image import math_img, mean_img
 from nipype.utils.filemanip import split_filename
+from pydra.tasks.nipype1.utils import Nipype1Task
 
 from meierlab.masks import create_avg_mask
 
@@ -151,7 +152,7 @@ def compute_outlier_values(
             save(sd_nii, out_folder / f"{save_prefix}_sd.nii.gz")
 
     for nii_img in nii_images:
-        _, subject, _ = split_filename(nii_img)
+        _, subject, _ = Nipype1Task(split_filename(nii_img))
         outlier_nii = compute_outlier_nii(
             nii_img,
             mask_nii,

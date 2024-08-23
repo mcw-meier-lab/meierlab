@@ -8,7 +8,7 @@ import pytest
 from meierlab.quality.freesurfer import FreeSurfer, get_FreeSurfer_colormap
 
 pytestmark = pytest.mark.skipif(
-    "FREESURFER_HOME" not in os.environ, reason="No FreeSurfer"
+    "SUBJECTS_DIR" not in os.environ, reason="No FreeSurfer"
 )
 
 
