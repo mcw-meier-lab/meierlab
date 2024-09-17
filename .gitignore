@@ -160,3 +160,5 @@ examples/*nii.gz
 examples/*.png
 
 tests/data/
+
+.pdm-python
