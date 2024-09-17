@@ -5,7 +5,7 @@
 groups = ["default", "dev", "doc", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:86a21154ba8e0f4023d44ca697cdaec02d7cd20b755eb4142ca89d5b941fb1e0"
+content_hash = "sha256:a71cc164c50a58cc257c291b4c764dbcd2d88bc77f492a8847f4fc91aa25ec7d"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -90,19 +90,6 @@ dependencies = [
 files = [
     {file = "asttokens-2.2.1-py2.py3-none-any.whl", hash = "sha256:6b0ac9e93fb0335014d382b8fa9b3afa7df546984258005da0b9e7095b3deb1c"},
     {file = "asttokens-2.2.1.tar.gz", hash = "sha256:4622110b2a6f30b77e1473affaa97e711bc2f07d3f10848420ff1898edbe94f3"},
-]
-
-[[package]]
-name = "attrs"
-version = "24.2.0"
-requires_python = ">=3.7"
-summary = "Classes Without Boilerplate"
-dependencies = [
-    "importlib-metadata; python_version < \"3.8\"",
-]
-files = [
-    {file = "attrs-24.2.0-py3-none-any.whl", hash = "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2"},
-    {file = "attrs-24.2.0.tar.gz", hash = "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"},
 ]
 
 [[package]]
@@ -307,16 +294,6 @@ dependencies = [
 files = [
     {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
     {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
-]
-
-[[package]]
-name = "cloudpickle"
-version = "3.0.0"
-requires_python = ">=3.8"
-summary = "Pickler class to extend the standard pickle.Pickler functionality"
-files = [
-    {file = "cloudpickle-3.0.0-py3-none-any.whl", hash = "sha256:246ee7d0c295602a036e86369c77fecda4ab17b506496730f2f576d9016fd9c7"},
-    {file = "cloudpickle-3.0.0.tar.gz", hash = "sha256:996d9a482c6fb4f33c1a35335cf8afd065d2a56e973270364840712d9131a882"},
 ]
 
 [[package]]
@@ -653,19 +630,6 @@ dependencies = [
 files = [
     {file = "executing-1.2.0-py2.py3-none-any.whl", hash = "sha256:0314a69e37426e3608aada02473b4161d4caf5a4b244d1d0c48072b8fee7bacc"},
     {file = "executing-1.2.0.tar.gz", hash = "sha256:19da64c18d2d851112f09c287f8d3dbbdf725ab0e569077efb6cdcbd3497c107"},
-]
-
-[[package]]
-name = "fileformats"
-version = "0.12.1"
-requires_python = ">=3.8"
-summary = "Classes for representing different file formats in Python classes for use in type hinting in data workflows"
-dependencies = [
-    "typing-extensions>=4.6.3; python_version < \"3.11\"",
-]
-files = [
-    {file = "fileformats-0.12.1-py3-none-any.whl", hash = "sha256:9d8eaf7a9efb078fcfbfea8f779d5b2b3399c9d9953ed1b4f18b593bffe5fcee"},
-    {file = "fileformats-0.12.1.tar.gz", hash = "sha256:7f9da4f3c1e78d370f6a537e0caf0e7fde6fc6ead88dadb2f4cecf4a2e77a01b"},
 ]
 
 [[package]]
@@ -1953,42 +1917,6 @@ files = [
 ]
 
 [[package]]
-name = "pydra"
-version = "0.23"
-requires_python = ">=3.8"
-summary = "Pydra dataflow engine"
-dependencies = [
-    "attrs>=19.1.0",
-    "cloudpickle>=2.0.0",
-    "etelemetry>=0.2.2",
-    "fileformats>=0.8",
-    "filelock>=3.0.0",
-    "importlib-resources>=5.7; python_version < \"3.11\"",
-    "platformdirs>=2",
-    "typing-extensions>=4.6.3; python_version < \"3.10\"",
-    "typing-utils>=0.1.0; python_version < \"3.10\"",
-]
-files = [
-    {file = "pydra-0.23-py3-none-any.whl", hash = "sha256:d8ba780575a95cf3886fa70cc54d20d4b62043bfeb8a4aa71a784b8e55b2d8cd"},
-    {file = "pydra-0.23.tar.gz", hash = "sha256:1965741230ab2684812b3e2a65b2b0ce0dfff11ae7afc32edec41c5c4618d05a"},
-]
-
-[[package]]
-name = "pydra-nipype1"
-version = "0.3.0"
-requires_python = ">=3.8"
-summary = "Tools for importing nipype 1.x interfaces into Pydra"
-dependencies = [
-    "attrs>=21.3.0",
-    "nipype",
-    "pydra>=0.6.2",
-]
-files = [
-    {file = "pydra_nipype1-0.3.0-py3-none-any.whl", hash = "sha256:884714184bbb13438c2ffda7b04b6ecc48deccddef9a5faf7cf2b770226ca0e0"},
-    {file = "pydra_nipype1-0.3.0.tar.gz", hash = "sha256:d2dd658c1eb82600bc831534e4590bc49c7645cba41671a24e0d06e943276051"},
-]
-
-[[package]]
 name = "pyflakes"
 version = "3.1.0"
 requires_python = ">=3.8"
@@ -2808,25 +2736,18 @@ files = [
 
 [[package]]
 name = "traits"
-version = "6.3.2"
+version = "6.3.0"
 requires_python = ">=3.6"
 summary = "Observable typed attributes for Python classes"
 files = [
-    {file = "traits-6.3.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6202ef3b2eb25663418b7afcacc998ebebcffcb629cefc8bc467e09967c71334"},
-    {file = "traits-6.3.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:f4241fd3877f51c5bfa00146eeba9bf20c2c58e5f985f4def2a2e7a910567768"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5d2aa937df4acd4d12d5db8cb7d411174600df592cab4d13ae978afdfeae65d1"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:f7e1ad9181eaf29aa133cd1def6b9d7858655fa8d3ac5d5af0f2fc76f01acf8c"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:d61c0f8807879a791844a47d8eb79200fed12790fcc8ff2a964ac099f866fb1e"},
-    {file = "traits-6.3.2-cp310-cp310-win32.whl", hash = "sha256:dc2154ff9ccee40a9022d619984130a39e52f9de6dd3e82ff9a667952322136c"},
-    {file = "traits-6.3.2-cp310-cp310-win_amd64.whl", hash = "sha256:f800d7de44df975f4cd2dbc0985542be23381f1095cd546b781edd43c73ac5f0"},
-    {file = "traits-6.3.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:27afa5c9899fd2089825c71b0951c244e33d08192d094861eae16ba5491dea13"},
-    {file = "traits-6.3.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:6318f75246bb187f666ce78071abff204cbac300608a9ad6720b5583b0ac3812"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:02ecb7847f05a0295915a4e920a4cd2b5d2ad893f0fcd2b942e172648527703f"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:ca4fc1076629ecd26810c24761452ee26ef6b9d62ef3f923d1f3f1929c23131a"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6c0167e8919b245588acfb53628fc103eb5f609bf0c42db873a5dd165feb3e5c"},
-    {file = "traits-6.3.2-cp39-cp39-win32.whl", hash = "sha256:98cfd9b08271eca16ae66d4aa171a8474cc8141bfc9827d0928a5e36a0c025b9"},
-    {file = "traits-6.3.2-cp39-cp39-win_amd64.whl", hash = "sha256:4ed07efffa7f045d69561f45bfa0d36a0a6790adea1575b5d3a5f0e433c9f241"},
-    {file = "traits-6.3.2.tar.gz", hash = "sha256:4520ef4a675181f38be4a5bab1b1d5472691597fe2cfe4faf91023e89407e2c6"},
+    {file = "traits-6.3.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:5290429594d020c8867a65ac1ad5a58f57856cc90815d2044c835a9d22426331"},
+    {file = "traits-6.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:aa74d01de196f0dceb7c6257fe14a6a7abd4194a33e20f48b1a47a9668f48f02"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a048a0e4863469b4265732c23ae0faec60acdf1c0cead5d2b1667ed4c913a359"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:fdabcc91702261c52b1c848f013d5e9514bc1af8de2a5b865cff8ce8c1f914b2"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:cde0da4ebbfe361abcaec29c4642701638d05cbe9f7b8edda12b8cb755beb3de"},
+    {file = "traits-6.3.0-cp310-cp310-win32.whl", hash = "sha256:9c22b37088a963f327841fa6d32c504351ca69824090277daabb80e108f202e8"},
+    {file = "traits-6.3.0-cp310-cp310-win_amd64.whl", hash = "sha256:af3680a283dd68017f1517d2d03218a01695ada576058b1ffa3fc44c4645ae8a"},
+    {file = "traits-6.3.0.tar.gz", hash = "sha256:770241df047feb9e3ed4c26a36c2468a5b754e6082a78eeb737f058bd45344f5"},
 ]
 
 [[package]]

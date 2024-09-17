@@ -17,8 +17,7 @@ dependencies = [
     "jupyter-dash>=0.4.2",
     "matplotlib>=3.8.2",
     "nireports>=23.2.1",
-    "pydra>=0.23",
-    "pydra-nipype1>=0.3.0",
+    "traits==6.3",
 ]
 requires-python = ">=3.10"
 readme = "README.rst"
