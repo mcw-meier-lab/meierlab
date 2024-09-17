@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 
@@ -5,6 +6,10 @@ import matplotlib
 import pytest
 
 from meierlab.quality.freesurfer import FreeSurfer, get_FreeSurfer_colormap
+
+pytestmark = pytest.mark.skipif(
+    "SUBJECTS_DIR" not in os.environ, reason="No FreeSurfer"
+)
 
 
 def test_get_FreeSurfer_colormap(fake_freesurfer_home, cmap):

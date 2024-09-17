@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import pytest
@@ -6,6 +7,7 @@ from meierlab.quality.freesurfer import FreeSurfer
 from meierlab.quality.workflows import fs_quality_wf
 
 
+@pytest.mark.skipif(os.getenv("SUBJECTS_DIR") is None, reason="No FreeSurfer")
 @pytest.mark.filterwarnings("ignore::UserWarning")
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_fs_quality_wf(

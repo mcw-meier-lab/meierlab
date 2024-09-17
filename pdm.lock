@@ -5,7 +5,7 @@
 groups = ["default", "dev", "doc", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:126a6c5a6b31703d4cc7ce593a03296395c44f78360201e1d09dc22ef0dadcf1"
+content_hash = "sha256:a71cc164c50a58cc257c291b4c764dbcd2d88bc77f492a8847f4fc91aa25ec7d"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -2736,25 +2736,18 @@ files = [
 
 [[package]]
 name = "traits"
-version = "6.3.2"
+version = "6.3.0"
 requires_python = ">=3.6"
 summary = "Observable typed attributes for Python classes"
 files = [
-    {file = "traits-6.3.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6202ef3b2eb25663418b7afcacc998ebebcffcb629cefc8bc467e09967c71334"},
-    {file = "traits-6.3.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:f4241fd3877f51c5bfa00146eeba9bf20c2c58e5f985f4def2a2e7a910567768"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5d2aa937df4acd4d12d5db8cb7d411174600df592cab4d13ae978afdfeae65d1"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:f7e1ad9181eaf29aa133cd1def6b9d7858655fa8d3ac5d5af0f2fc76f01acf8c"},
-    {file = "traits-6.3.2-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:d61c0f8807879a791844a47d8eb79200fed12790fcc8ff2a964ac099f866fb1e"},
-    {file = "traits-6.3.2-cp310-cp310-win32.whl", hash = "sha256:dc2154ff9ccee40a9022d619984130a39e52f9de6dd3e82ff9a667952322136c"},
-    {file = "traits-6.3.2-cp310-cp310-win_amd64.whl", hash = "sha256:f800d7de44df975f4cd2dbc0985542be23381f1095cd546b781edd43c73ac5f0"},
-    {file = "traits-6.3.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:27afa5c9899fd2089825c71b0951c244e33d08192d094861eae16ba5491dea13"},
-    {file = "traits-6.3.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:6318f75246bb187f666ce78071abff204cbac300608a9ad6720b5583b0ac3812"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:02ecb7847f05a0295915a4e920a4cd2b5d2ad893f0fcd2b942e172648527703f"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:ca4fc1076629ecd26810c24761452ee26ef6b9d62ef3f923d1f3f1929c23131a"},
-    {file = "traits-6.3.2-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6c0167e8919b245588acfb53628fc103eb5f609bf0c42db873a5dd165feb3e5c"},
-    {file = "traits-6.3.2-cp39-cp39-win32.whl", hash = "sha256:98cfd9b08271eca16ae66d4aa171a8474cc8141bfc9827d0928a5e36a0c025b9"},
-    {file = "traits-6.3.2-cp39-cp39-win_amd64.whl", hash = "sha256:4ed07efffa7f045d69561f45bfa0d36a0a6790adea1575b5d3a5f0e433c9f241"},
-    {file = "traits-6.3.2.tar.gz", hash = "sha256:4520ef4a675181f38be4a5bab1b1d5472691597fe2cfe4faf91023e89407e2c6"},
+    {file = "traits-6.3.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:5290429594d020c8867a65ac1ad5a58f57856cc90815d2044c835a9d22426331"},
+    {file = "traits-6.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:aa74d01de196f0dceb7c6257fe14a6a7abd4194a33e20f48b1a47a9668f48f02"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a048a0e4863469b4265732c23ae0faec60acdf1c0cead5d2b1667ed4c913a359"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:fdabcc91702261c52b1c848f013d5e9514bc1af8de2a5b865cff8ce8c1f914b2"},
+    {file = "traits-6.3.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:cde0da4ebbfe361abcaec29c4642701638d05cbe9f7b8edda12b8cb755beb3de"},
+    {file = "traits-6.3.0-cp310-cp310-win32.whl", hash = "sha256:9c22b37088a963f327841fa6d32c504351ca69824090277daabb80e108f202e8"},
+    {file = "traits-6.3.0-cp310-cp310-win_amd64.whl", hash = "sha256:af3680a283dd68017f1517d2d03218a01695ada576058b1ffa3fc44c4645ae8a"},
+    {file = "traits-6.3.0.tar.gz", hash = "sha256:770241df047feb9e3ed4c26a36c2468a5b754e6082a78eeb737f058bd45344f5"},
 ]
 
 [[package]]
