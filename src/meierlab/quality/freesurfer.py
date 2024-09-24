@@ -411,7 +411,9 @@ class FreeSurfer:
         """
         if template is None:
             template = Path(
-                os.path.join(os.path.dirname(__file__), "html/freesurfer.html")
+                os.path.join(
+                    os.path.dirname(__file__), "html/freesurfer_individual.html"
+                )
             )
         if img_out is None:
             image_list = list(self.data_dir.glob("*/*svg"))

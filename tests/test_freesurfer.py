@@ -6,7 +6,7 @@ import matplotlib
 import pytest
 
 from meierlab.quality.freesurfer import FreeSurfer, get_FreeSurfer_colormap
-from meierlab.stats.freesurfer import get_aparc_stats, get_aseg_stats
+from meierlab.stats.freesurfer import gen_group_report, get_aparc_stats, get_aseg_stats
 
 pytestmark = pytest.mark.skipif(
     "SUBJECTS_DIR" not in os.environ, reason="No FreeSurfer"
@@ -184,3 +184,14 @@ def test_get_aparc_stats(fake_subjects_dir):
     assert len(aparc_list) > 0
     for aparc in aparc_list:
         assert Path(aparc).exists()
+
+
+def test_gen_group_report(tests_data_path):
+    html_file = gen_group_report(
+        f"{tests_data_path}/aseg.csv",
+        [f for f in list(Path(tests_data_path).glob("*aparc*csv")) if f.is_file()],
+        tests_data_path,
+        "example.html",
+        tests_data_path,
+    )
+    assert html_file.exists()
