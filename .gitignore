@@ -43,7 +43,7 @@ htmlcov/
 .nox/
 .cache
 nosetests.xml
-*.cover
+*.cover*
 *.py,cover
 .hypothesis/
 .pytest_cache/
