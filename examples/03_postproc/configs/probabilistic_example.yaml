@@ -1,0 +1,32 @@
+# Probabilistic tractography example configuration
+# This configuration demonstrates a probabilistic tractography pipeline
+# using CSD model and GFA-based stopping criterion.
+
+# Output settings
+output_dir: "probabilistic_example_output"  # Directory for output files
+num_workers: 4  # Number of parallel workers for processing
+
+# Tracking parameters
+step_size: 0.5  # Step size in mm for streamline propagation
+max_cross: 1    # Maximum number of fiber crossings to handle
+seeds_count: 10000  # Number of seed points to generate
+
+# CSD parameters
+csd_sphere: "repulsion724"  # Sphere for CSD model
+csd_relative_peak_threshold: 0.5  # Relative peak threshold for CSD
+csd_min_separation_angle: 25.0  # Minimum separation angle between peaks
+csf_gfa_threshold: 0.1  # GFA threshold for stopping criterion
+
+# Optimization settings
+optimize_params: true  # Enable parameter optimization
+optimization_metric: "similarity_score"  # Metric to optimize
+n_trials: 20  # Number of optimization trials
+
+# Parameter ranges for optimization
+param_ranges:
+  step_size: [0.1, 1.0]  # Range for step size optimization
+  max_cross: [1, 3]      # Range for max crossings optimization
+  seeds_count: [5000, 20000]  # Range for number of seeds
+  csd_relative_peak_threshold: [0.3, 0.7]  # Range for peak threshold
+  csd_min_separation_angle: [15.0, 35.0]  # Range for separation angle
+  csd_gfa_threshold: [0.05, 0.2]  # Range for GFA threshold

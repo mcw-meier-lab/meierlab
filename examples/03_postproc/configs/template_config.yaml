@@ -1,0 +1,73 @@
+# Template Configuration for Tractography Pipeline
+# =============================================
+# This template provides a starting point for creating your own tractography configurations.
+# Copy this file and modify the values according to your needs.
+
+# General Settings
+# ---------------
+output_dir: "your_output_directory"  # Directory where results will be saved
+num_workers: 4                      # Number of parallel workers for processing (recommended: 4-8)
+
+# Tracking Parameters
+# -----------------
+# These parameters control the basic behavior of the tractography algorithm
+step_size: 0.5                      # Step size in mm for streamline propagation (range: 0.1-1.0)
+max_cross: 1                        # Maximum number of fiber crossings to handle (range: 1-3)
+seeds_count: 10000                  # Number of seed points to generate (range: 5000-20000)
+
+# Model-Specific Parameters
+# -----------------------
+# Choose one of the following sections based on your tracking method:
+
+# For DTI-based tracking (deterministic)
+dti_fa_threshold: 0.2               # FA threshold for stopping criterion (range: 0.1-0.3)
+
+# For CSD-based tracking (probabilistic)
+csd_sphere: "repulsion724"          # Sphere used for CSD (options: "repulsion724", "symmetric362")
+csd_relative_peak_threshold: 0.5    # Relative peak threshold (range: 0.1-1.0)
+csd_min_separation_angle: 25.0      # Minimum separation angle in degrees (range: 15-45)
+csd_gfa_threshold: 0.1              # GFA threshold for stopping (range: 0.05-0.2)
+
+# For CMC-based tracking
+wm_threshold: 0.2                   # White matter probability threshold (range: 0.1-0.3)
+gm_threshold: 0.2                   # Gray matter probability threshold (range: 0.1-0.3)
+csf_threshold: 0.2                  # CSF probability threshold (range: 0.1-0.3)
+
+# Optimization Settings
+# -------------------
+# Enable parameter optimization
+optimize_params: true               # Set to true to enable parameter optimization
+optimization_metric: "similarity_score"  # Metric to optimize (options: "similarity_score", "length", "curvature")
+n_trials: 20                        # Number of optimization trials (recommended: 20-50)
+
+# Parameter Ranges for Optimization
+# ------------------------------
+# Define ranges for parameters to optimize
+# Format: [min_value, max_value]
+param_ranges:
+  # Basic tracking parameters
+  step_size: [0.1, 1.0]            # Range for step size optimization
+  max_cross: [1, 3]                # Range for max crossings optimization
+  seeds_count: [5000, 20000]       # Range for number of seeds
+
+  # DTI parameters
+  dti_fa_threshold: [0.1, 0.3]     # Range for FA threshold optimization
+
+  # CSD parameters
+  csd_relative_peak_threshold: [0.1, 1.0]    # Range for peak threshold optimization
+  csd_min_separation_angle: [15.0, 45.0]     # Range for separation angle optimization
+  csd_gfa_threshold: [0.05, 0.2]             # Range for GFA threshold optimization
+
+  # CMC parameters
+  wm_threshold: [0.1, 0.3]         # Range for WM threshold optimization
+  gm_threshold: [0.1, 0.3]         # Range for GM threshold optimization
+  csf_threshold: [0.1, 0.3]        # Range for CSF threshold optimization
+
+# Example Usage
+# ------------
+# 1. Copy this template to a new file (e.g., my_config.yaml)
+# 2. Choose your tracking method and uncomment the relevant section
+# 3. Adjust parameters based on your data and requirements
+# 4. Use the config in your pipeline:
+#    from meierlab.postproc.quality.pipeline_config import load_config
+#    config = load_config("my_config.yaml")
