@@ -20,6 +20,11 @@ dependencies = [
     "traits==6.3",
     "statsmodels>=0.14.4",
     "tables>=3.10.1",
+    "memory-profiler>=0.61.0",
+    "imageio>=2.37.0",
+    "imageio-ffmpeg>=0.6.0",
+    "optuna>=4.3.0",
+    "scikit-image>=0.25.2",
 ]
 requires-python = ">=3.10"
 readme = "README.rst"
