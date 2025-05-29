@@ -1,10 +1,12 @@
 import gc
 import logging
+import multiprocessing
 import os
+import shutil
+import time
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 
 import dipy.stats.analysis as dsa
@@ -145,7 +147,7 @@ def afq(atlas_dir: Path, data_dir: Path, out_dir: Path, metrics: list[str]):
     for each subject and bundle, and creates an HTML report summarizing the results.
     """
     # Create output directory
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # Initialize data structures
     profiles_data = {}
@@ -159,26 +161,26 @@ def afq(atlas_dir: Path, data_dir: Path, out_dir: Path, metrics: list[str]):
 
     # Collect all subject paths using the same logic as buan_shape_similarity
     all_subjects = []
-    if os.path.isdir(data_dir):
-        groups = sorted(os.listdir(data_dir))
+    if data_dir.is_dir():
+        groups = sorted(data_dir.iterdir())
     else:
         raise ValueError("Not a directory")
 
     for group in groups:
-        group_path = os.path.join(data_dir, group)
-        if os.path.isdir(group_path):
-            subjects = sorted(os.listdir(group_path))
+        group_path = data_dir / group
+        if group_path.is_dir():
+            subjects = sorted(group_path.iterdir())
             logging.info(
                 f"First {len(subjects)} subjects in matrix belong to {group} group"
             )
-            all_subjects.extend([os.path.join(group_path, sub) for sub in subjects])
+            all_subjects.extend([group_path / sub for sub in subjects])
 
     N = len(all_subjects)
     logging.info(f"Processing {N} subjects")
 
     for bundle in atlas_bundles:
         mb = load_trk(str(bundle), reference="same", bbox_valid_check=False).streamlines
-        mb_name = os.path.basename(bundle).split(".trk")[0]
+        mb_name = bundle.stem
         logging.info(f"Processing bundle: {mb_name}")
 
         # Cluster and get standard bundle
@@ -190,7 +192,7 @@ def afq(atlas_dir: Path, data_dir: Path, out_dir: Path, metrics: list[str]):
 
         # Process each subject
         for subj_path in all_subjects:
-            subject_id = os.path.basename(subj_path)
+            subject_id = subj_path.stem
             logging.info(f"Processing subject: {subject_id}")
 
             # Initialize subject data
@@ -337,21 +339,38 @@ def _get_available_memory():
     return psutil.virtual_memory().available
 
 
-def _estimate_bundle_memory_usage(bundle_path):
-    """Estimate memory usage for a bundle based on its file size.
+def _estimate_bundle_memory_usage(bundle_path: str) -> int:
+    """Estimate memory usage for a bundle file based on its file size.
 
     Parameters
     ----------
     bundle_path : str
-        Path to the bundle file
+        Path to the bundle file (.trk or .h5)
 
     Returns
     -------
     int
-        Estimated memory usage in bytes (approximately 2-3x file size)
+        Estimated memory usage in bytes
     """
-    # Rough estimate: bundle in memory is about 2-3x its file size
-    return _get_bundle_size(bundle_path) * 3
+    try:
+        # Get file size
+        file_size = os.path.getsize(bundle_path)
+
+        # Different expansion factors based on file type
+        if bundle_path.endswith(".h5"):
+            # For HDF5 files, we estimate memory usage based on:
+            # 1. File size (compressed data)
+            # 2. Expected expansion factor when loaded into memory
+            # 3. Additional overhead for pandas DataFrame operations
+            estimated_memory = file_size * 5  # Conservative estimate
+        else:
+            # For .trk files, use the original estimation
+            estimated_memory = file_size * 3  # Original estimate for .trk files
+
+        return estimated_memory
+    except Exception as e:
+        logging.warning(f"Error estimating memory for {bundle_path}: {e}")
+        return 1024 * 1024 * 100  # Default to 100MB if estimation fails
 
 
 def _check_output_exists(out_dir: Path, bun: str) -> bool:
@@ -380,12 +399,42 @@ def _check_output_exists(out_dir: Path, bun: str) -> bool:
     return False
 
 
+def _collect_paths(data_dir: Path):
+    """Collect all paths from data directory.
+
+    Parameters
+    ----------
+    data_dir : Path
+        Path to data directory
+
+    Returns
+    -------
+    tuple of (list of str, list of Path)
+        List of groups and list of paths from data directory
+    """
+    all_subjects = []
+    if data_dir.is_dir():
+        groups = sorted(d.name for d in data_dir.iterdir())
+    else:
+        raise ValueError("Not a directory")
+
+    for group in groups:
+        group_path = data_dir / group
+        if group_path.is_dir():
+            subjects = sorted(s.name for s in group_path.iterdir())
+            logging.info(
+                f"First {len(subjects)} subjects in matrix belong to {group} group"
+            )
+            all_subjects.extend([group_path / sub for sub in subjects])
+
+    return groups, all_subjects
+
+
 def buan_shape_similarity(
-    atlas_dir: Path,
     data_dir: Path,
     out_dir: Path,
-    clust_thr=10,
-    threshold=10,
+    clust_thr=(5, 3, 1.5),
+    threshold=6,
     num_workers=None,
     batch_size=10,
     memory_threshold=0.8,
@@ -395,18 +444,16 @@ def buan_shape_similarity(
 
     Parameters
     ----------
-    atlas_dir : Path
-        Path to atlas directory
     data_dir : Path
         Path to data directory
     out_dir : Path
         Path to output directory
-    clust_thr : float, optional
-        Clustering threshold for bundle shape similarity
-        Default is 10
+    clust_thr : tuple, optional
+        Clustering thresholds for bundle shape similarity
+        Default is (5, 3, 1.5)
     threshold : float, optional
         Threshold for bundle shape similarity
-        Default is 10
+        Default is 6
     num_workers : int, optional
         Number of parallel workers
         Default is None (uses all available CPUs)
@@ -428,34 +475,20 @@ def buan_shape_similarity(
     rng = np.random.default_rng()
 
     # Create output directory if it doesn't exist
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # Collect all subject paths
-    all_subjects = []
-    if os.path.isdir(data_dir):
-        groups = sorted(os.listdir(data_dir))
-    else:
-        raise ValueError("Not a directory")
-
-    for group in groups:
-        group_path = os.path.join(data_dir, group)
-        if os.path.isdir(group_path):
-            subjects = sorted(os.listdir(group_path))
-            logging.info(
-                f"First {len(subjects)} subjects in matrix belong to {group} group"
-            )
-            all_subjects.extend([os.path.join(group_path, sub) for sub in subjects])
-
+    _, all_subjects = _collect_paths(data_dir)
     N = len(all_subjects)
     logging.info(f"Processing {N} subjects")
 
     # Get all bundle files from first subject and sort by size
-    bundles_dir = os.path.join(all_subjects[0], "rec_bundles")
-    bundles = sorted(os.listdir(bundles_dir))
+    bundles_dir = all_subjects[0] / "rec_bundles"
+    bundles = sorted(b.name for b in bundles_dir.iterdir())
 
     # Sort bundles by size (smallest first)
     bundle_sizes = [
-        (bun, _get_bundle_size(os.path.join(bundles_dir, bun))) for bun in bundles
+        (str(bun), _get_bundle_size(str(bundles_dir / bun))) for bun in bundles
     ]
     bundle_sizes.sort(key=lambda x: x[1])
     bundles = [bun for bun, _ in bundle_sizes]
@@ -476,7 +509,7 @@ def buan_shape_similarity(
             # Check available memory before loading bundles
             available_memory = _get_available_memory()
             estimated_memory_needed = N * _estimate_bundle_memory_usage(
-                os.path.join(bundles_dir, bun)
+                str(bundles_dir / bun)
             )
 
             if estimated_memory_needed > available_memory * memory_threshold:
@@ -486,7 +519,7 @@ def buan_shape_similarity(
             # Load bundles in batches to manage memory
             all_bundles = []
             for sub in all_subjects:
-                bundle_path = os.path.join(sub, "rec_bundles", bun)
+                bundle_path = str(sub / "rec_bundles" / bun)
                 try:
                     bundle = load_tractogram(
                         bundle_path,
@@ -522,13 +555,15 @@ def buan_shape_similarity(
                     )
 
             # Process comparisons in parallel
-            with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            with ProcessPoolExecutor(
+                max_workers=num_workers, mp_context=multiprocessing.get_context("fork")
+            ) as executor:
                 for i, j, value in executor.map(_compute_similarity, args):
                     ba_matrix[i][j] = value
                     ba_matrix[j][i] = value  # Fill in symmetric part
 
             # Save results
-            output_path = os.path.join(out_dir, bun[:-4] + ".npy")
+            output_path = str(out_dir / (bun[:-4] + ".npy"))
             logging.info(f"Saving BA score matrix to {output_path}")
             np.save(output_path, ba_matrix)
 
@@ -538,7 +573,7 @@ def buan_shape_similarity(
             plt.imshow(ba_matrix, cmap="Blues")
             plt.colorbar()
             plt.clim(0, 1)
-            plt.savefig(os.path.join(out_dir, f"SM_{bun[:-4]}"))
+            plt.savefig(str(out_dir / f"SM_{bun[:-4]}"))
             plt.close()
 
             # Clear memory
@@ -560,10 +595,10 @@ def _process_bundle_metrics(args):
             Path to bundle
         org_bd_path : str
             Path to original bundle
-        metric_files_dti : list of str
-            List of DTI metric file paths
-        metric_files_csa : list of str
-            List of CSA metric file paths
+        metric_files : list of str
+            List of diffusion metric file paths
+        metric_files_pam : list of str
+            List of pam5 metric file paths
         subject : str
             Subject identifier
         group_id : str
@@ -577,8 +612,8 @@ def _process_bundle_metrics(args):
         mb_path,
         bd_path,
         org_bd_path,
-        metric_files_dti,
-        metric_files_csa,
+        metric_files,
+        metric_files_pam,
         subject,
         group_id,
         no_disks,
@@ -587,98 +622,183 @@ def _process_bundle_metrics(args):
 
     try:
         # Load bundles
-        mbundles = load_tractogram(
+        mbundles = load_trk(
             mb_path, reference="same", bbox_valid_check=False
         ).streamlines
-        bundles = load_tractogram(
+        bundles = load_trk(
             bd_path, reference="same", bbox_valid_check=False
         ).streamlines
-        orig_bundles = load_tractogram(
+        orig_bundles = load_trk(
             org_bd_path, reference="same", bbox_valid_check=False
         ).streamlines
-
-        if len(orig_bundles) <= 5:
-            logging.warning(
-                f"Skipping bundle {os.path.basename(mb_path)} - too few streamlines"
-            )
-            return
-
-        # Compute assignment map
-        indx = dsa.assignment_map(bundles, mbundles, no_disks)
-        ind = np.array(indx)
-
-        # Load and transform bundles
-        _, affine = load_nifti(metric_files_dti[0])
-        affine_r = np.linalg.inv(affine)
-        transformed_orig_bundles = dts.transform_streamlines(orig_bundles, affine_r)
-
-        # Process DTI metrics
-        for metric_path in metric_files_dti:
-            try:
-                metric_name = os.path.basename(metric_path)[:-7]
-                bm = os.path.basename(mb_path)[:-4]
-
-                logging.info(f"Processing DTI metric {metric_name} for bundle {bm}")
-
-                dt = {}
-                metric, _ = load_nifti(metric_path)
-
-                dsa.anatomical_measures(
-                    transformed_orig_bundles,
-                    metric,
-                    dt,
-                    metric_name,
-                    bm,
-                    subject,
-                    group_id,
-                    ind,
-                    out_dir,
-                )
-            except Exception as e:
-                logging.error(f"Error processing DTI metric {metric_path}: {e}")
-                continue
-
-        # Process CSA metrics
-        for metric_path in metric_files_csa:
-            try:
-                metric_name = os.path.basename(metric_path)[:-5]
-                bm = os.path.basename(mb_path)[:-4]
-
-                logging.info(f"Processing CSA metric {metric_name} for bundle {bm}")
-
-                dt = {}
-                metric = load_peaks(metric_path)
-
-                dsa.peak_values(
-                    transformed_orig_bundles,
-                    metric,
-                    dt,
-                    metric_name,
-                    bm,
-                    subject,
-                    group_id,
-                    ind,
-                    out_dir,
-                )
-            except Exception as e:
-                logging.error(f"Error processing CSA metric {metric_path}: {e}")
-                continue
-
     except Exception as e:
-        logging.error(f"Error processing bundle {os.path.basename(mb_path)}: {e}")
+        logging.error(f"Error loading bundle {mb_path}: {e}")
         return
+
+    if len(orig_bundles) <= 5:
+        logging.warning(
+            f"Skipping bundle {os.path.basename(mb_path)} - too few streamlines"
+        )
+        return
+
+    # Compute assignment map
+    indx = dsa.assignment_map(bundles, mbundles, no_disks)
+    ind = np.array(indx)
+
+    # Load and transform bundles
+    _, affine = load_nifti(metric_files[0])
+    affine_r = np.linalg.inv(affine)
+    transformed_orig_bundles = dts.transform_streamlines(orig_bundles, affine_r)
+
+    # Create a unique output directory for this process
+    process_id = os.getpid()
+    process_out_dir = Path(out_dir) / f"process_{process_id}"
+    process_out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Process DTI metrics
+    for ii in range(len(metric_files)):
+        metric_path = metric_files[ii]
+        try:
+            metric_name = os.path.split(metric_path)[1][:-7]
+            bm = os.path.split(mb_path)[1][:-4]
+            logging.info(f"Processing metric {metric_name} for bundle {bm}")
+
+            dt = {}
+            metric, _ = load_nifti(metric_path)
+
+            # Create a unique output directory for this metric and bundle
+            metric_out_dir = process_out_dir / f"{metric_name}_{bm}"
+            metric_out_dir.mkdir(parents=True, exist_ok=True)
+
+            dsa.anatomical_measures(
+                transformed_orig_bundles,
+                metric,
+                dt,
+                metric_name,
+                bm,
+                subject.name,
+                group_id,
+                ind,
+                str(metric_out_dir),
+            )
+        except Exception as e:
+            logging.error(f"Error processing DTI metric {metric_path}: {e}")
+            continue
+
+    # Process pam5 metrics
+    for metric_path in metric_files_pam:
+        try:
+            metric_name = _get_metric_name(metric_path)[0]
+            bm = os.path.basename(mb_path)[:-4]
+
+            logging.info(f"Processing metric {metric_name} for bundle {bm}")
+
+            dt = {}
+            metric = load_peaks(str(metric_path))
+
+            # Create a unique output directory for this metric and bundle
+            metric_out_dir = process_out_dir / f"{metric_name}_{bm}"
+            metric_out_dir.mkdir(parents=True, exist_ok=True)
+
+            dsa.peak_values(
+                transformed_orig_bundles,
+                metric,
+                dt,
+                metric_name,
+                bm,
+                subject.name,
+                group_id,
+                ind,
+                str(metric_out_dir),
+            )
+        except Exception as e:
+            logging.error(f"Error processing metric {metric_path}: {e}")
+            continue
+
+    # After processing is complete, merge the results into the main output directory
+    try:
+        for metric_dir in process_out_dir.iterdir():
+            if metric_dir.is_dir():
+                target_dir = Path(out_dir) / metric_dir.name
+                target_dir.mkdir(parents=True, exist_ok=True)
+
+                # Move all files from the process-specific directory to the target directory
+                for file in metric_dir.glob("*"):
+                    if file.is_file():
+                        target_file = target_dir / file.name
+                        lock_file = target_file.with_suffix(".lock")
+
+                        # Try to acquire lock
+                        try:
+                            # Create lock file
+                            with open(lock_file, "x") as f:
+                                f.write(str(process_id))
+
+                            if target_file.exists():
+                                # If file exists, append the data
+                                try:
+                                    with pd.HDFStore(
+                                        str(target_file), mode="a"
+                                    ) as target_store:
+                                        with pd.HDFStore(
+                                            str(file), mode="r"
+                                        ) as source_store:
+                                            for key in source_store.keys():
+                                                df = source_store.get(key)
+                                                target_store.append(
+                                                    key, df, format="t", append=True
+                                                )
+                                except Exception as e:
+                                    logging.error(
+                                        f"Error appending to HDF5 file {target_file}: {e}"
+                                    )
+                                    # If append fails, try to create a new file
+                                    try:
+                                        with pd.HDFStore(
+                                            str(target_file), mode="w"
+                                        ) as target_store:
+                                            with pd.HDFStore(
+                                                str(file), mode="r"
+                                            ) as source_store:
+                                                for key in source_store.keys():
+                                                    df = source_store.get(key)
+                                                    target_store.put(
+                                                        key, df, format="t"
+                                                    )
+                                    except Exception as e:
+                                        logging.error(
+                                            f"Error creating new HDF5 file {target_file}: {e}"
+                                        )
+                                        continue
+                            else:
+                                # If file doesn't exist, just move it
+                                shutil.move(str(file), str(target_file))
+                        except FileExistsError:
+                            # If lock file exists, wait and retry
+                            time.sleep(0.1)
+                            continue
+                        finally:
+                            # Remove lock file
+                            try:
+                                lock_file.unlink()
+                            except Exception:
+                                pass
+    except Exception as e:
+        logging.error(f"Error merging results for process {process_id}: {e}")
+    finally:
+        # Clean up the process-specific directory
+        try:
+            shutil.rmtree(process_out_dir)
+        except Exception as e:
+            logging.error(f"Error cleaning up process directory {process_out_dir}: {e}")
 
 
 def buan_profiles(
     model_bundle_folder: Path,
-    bundle_folder: Path,
-    orig_bundle_folder: Path,
-    metric_folder: Path,
-    group_id: str,
-    subject: str,
+    data_dir: Path,
     *,
     no_disks: int = 100,
-    out_dir: str = "",
+    out_dir: Path = Path("bundle_profiles"),
     num_workers: int | None = None,
     batch_size: int = 5,
     memory_threshold: float = 0.8,
@@ -689,22 +809,14 @@ def buan_profiles(
     ----------
     model_bundle_folder : Path
         Path to model bundle directory
-    bundle_folder : Path
-        Path to bundle directory
-    orig_bundle_folder : Path
-        Path to original bundle directory
-    metric_folder : Path
-        Path to metric files directory
-    group_id : str
-        Group identifier
-    subject : str
-        Subject identifier
+    data_dir : Path
+        Path to data directory
     no_disks : int, optional
         Number of disks for assignment map
         Default is 100
-    out_dir : str, optional
+    out_dir : Path, optional
         Output directory
-        Default is current directory
+        Default is bundle_profiles in current directory
     num_workers : int, optional
         Number of parallel workers
         Default is None (uses all available cores)
@@ -721,65 +833,89 @@ def buan_profiles(
     and memory management to handle large datasets efficiently.
     """
     # Create output directory
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    groups, all_subjects = _collect_paths(data_dir)
+    N = len(all_subjects)
+    logging.info(f"Processing {N} subjects")
 
     # Get all bundle files
-    mb = sorted(glob(os.path.join(model_bundle_folder, "*.trk")))
-    bd = sorted(glob(os.path.join(bundle_folder, "*.trk")))
-    org_bd = sorted(glob(os.path.join(orig_bundle_folder, "*.trk")))
+    mb = sorted(model_bundle_folder.glob("*.trk"))
+    bundles_dir = all_subjects[0] / "rec_bundles"
+    bundles = sorted(b.name for b in bundles_dir.iterdir())
 
-    if not (len(mb) == len(bd) == len(org_bd)):
-        raise ValueError(
-            "Number of bundles in model, bundle, and original bundle folders must match"
-        )
+    # Sort bundles by size (smallest first)
+    bundle_sizes = [
+        (str(bun), _get_bundle_size(str(bundles_dir / bun))) for bun in bundles
+    ]
+    bundle_sizes.sort(key=lambda x: x[1])
+    bundles = [bun for bun, _ in bundle_sizes]
 
-    # Get metric files
-    metric_files_dti = sorted(glob(os.path.join(metric_folder, "*.nii.gz")))
-    metric_files_csa = sorted(glob(os.path.join(metric_folder, "*.pam5")))
-
-    if not (metric_files_dti or metric_files_csa):
-        raise ValueError("No metric files found in metric folder")
-
-    # Prepare arguments for parallel processing
-    args_list = []
-    for mb_path, bd_path, org_bd_path in zip(mb, bd, org_bd, strict=False):
-        args_list.append(
-            (
-                mb_path,
-                bd_path,
-                org_bd_path,
-                metric_files_dti,
-                metric_files_csa,
-                subject,
-                group_id,
-                no_disks,
-                out_dir,
-            )
-        )
-
-    # Process bundles in batches to manage memory
-    for i in range(0, len(args_list), batch_size):
-        batch = args_list[i : i + batch_size]
+    for i in range(0, len(bundles), batch_size):
+        batch = bundles[i : i + batch_size]
         logging.info(f"Processing batch of {len(batch)} bundles")
 
-        # Check available memory
-        available_memory = _get_available_memory()
-        estimated_memory_needed = sum(
-            _estimate_bundle_memory_usage(mb_path) for mb_path in batch[0]
-        )
+        for bun in batch:
+            logging.info(f"Processing bundle: {bun}")
 
-        if estimated_memory_needed > available_memory * memory_threshold:
-            logging.warning("Not enough memory for batch. Reducing batch size...")
-            batch = batch[: len(batch) // 2]
-            if not batch:
-                raise MemoryError("Not enough memory to process even a single bundle")
+            # Check available memory before loading bundles
+            available_memory = _get_available_memory()
+            estimated_memory_needed = N * _estimate_bundle_memory_usage(
+                str(bundles_dir / bun)
+            )
 
-        # Process batch in parallel
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            list(executor.map(_process_bundle_metrics, batch))
+            if estimated_memory_needed > available_memory * memory_threshold:
+                logging.warning(f"Not enough memory for bundle {bun}. Skipping...")
+                continue
 
-        # Clear memory after each batch
-        gc.collect()
+            # Load bundles in batches to manage memory
+            for sub in all_subjects:
+                for g in groups:
+                    if g in str(sub):
+                        group_id = g
+                        break
+
+                bd = sorted(sub.glob("rec_bundles/*.trk"))
+                org_bd = sorted(sub.glob("org_bundles/*.trk"))
+
+                if not (len(mb) == len(bd) == len(org_bd)):
+                    raise ValueError(
+                        "Number of bundles in model, bundle, and original bundle folders must match"
+                    )
+
+                # Get metric files
+                metric_files = sorted(sub.glob("anatomical_measures/*.nii.gz"))
+                metric_files_pam = sorted(sub.glob("anatomical_measures/*.pam5"))
+
+                if not (metric_files or metric_files_pam):
+                    raise ValueError("No metric files found in metric folder")
+
+                # Prepare arguments for parallel processing
+                args_list = []
+                for mb_path, bd_path, org_bd_path in zip(mb, bd, org_bd, strict=False):
+                    args_list.append(
+                        (
+                            str(mb_path),
+                            str(bd_path),
+                            str(org_bd_path),
+                            metric_files,
+                            metric_files_pam,
+                            sub,
+                            group_id,
+                            no_disks,
+                            out_dir,
+                        )
+                    )
+
+                # Process batch in parallel
+                with ProcessPoolExecutor(
+                    max_workers=num_workers,
+                    mp_context=multiprocessing.get_context("fork"),
+                ) as executor:
+                    list(executor.map(_process_bundle_metrics, args_list))
+
+                # Clear memory after each batch
+                gc.collect()
 
     logging.info("Bundle profile processing completed successfully")
 
@@ -802,12 +938,26 @@ def _get_metric_name(path: str) -> tuple[str, str, str]:
     if ext_pos == -1:
         return " ", " ", " "
 
-    for i in range(len(name)):
-        if name[i] == "_":
-            if name[i + 1] not in ["L", "R"]:
-                return name[i + 1 : ext_pos], name[:i], name[:ext_pos]
+    # Find the last underscore before the extension
+    last_underscore = name.rfind("_", 0, ext_pos)
+    if last_underscore == -1:
+        return " ", " ", " "
 
-    return " ", " ", " "
+    # Check if the part after the last underscore is a metric name
+    # (not a hemisphere indicator like L or R)
+    metric_part = name[last_underscore + 1 : ext_pos]
+    if metric_part in ["L", "R"]:
+        # If it's a hemisphere indicator, look for the second-to-last underscore
+        second_last_underscore = name.rfind("_", 0, last_underscore)
+        if second_last_underscore == -1:
+            return " ", " ", " "
+        return (
+            name[second_last_underscore + 1 : ext_pos],
+            name[:second_last_underscore],
+            name[:ext_pos],
+        )
+
+    return name[last_underscore + 1 : ext_pos], name[:last_underscore], name[:ext_pos]
 
 
 def _save_lmm_plot(plot_file: str, title: str, bundle_name: str, x: list, y: list):
@@ -946,19 +1096,31 @@ def _process_lmm_file(args):
 
         logging.info(f"Processing {metric_name} for bundle {bundle_name}")
 
+        # Create a unique output directory for this process
+        process_id = os.getpid()
+        process_out_dir = Path(out_dir) / f"process_{process_id}"
+        process_out_dir.mkdir(parents=True, exist_ok=True)
+
         # Initialize arrays for results
         pvalues = np.zeros((no_disks, len(config.fixed_effects)))
         coefficients = np.zeros((no_disks, len(config.fixed_effects)))
         std_errors = np.zeros((no_disks, len(config.fixed_effects)))
 
+        # Read the entire HDF5 file once
+        try:
+            df = pd.read_hdf(file_path, key=Path(file_path).stem)
+        except Exception as e:
+            logging.error(f"Error reading HDF5 file {file_path}: {e}")
+            return
+
         # Process each disk
         for i in range(no_disks):
             disk_count = i + 1
             try:
-                # Read data for current disk
-                df = pd.read_hdf(file_path, where=f"disk={disk_count}")
+                # Filter data for current disk
+                disk_data = df[df["disk"] == disk_count]
 
-                if len(df) < 10:
+                if len(disk_data) < 10:
                     logging.warning(
                         f"Not enough data for disk {disk_count} in {file_path}"
                     )
@@ -970,13 +1132,15 @@ def _process_lmm_file(args):
                 logging.info(f"Fitting model: {formula}")
 
                 if config.family == "gaussian":
-                    md = smf.mixedlm(formula, df, groups=df[config.random_effects[0]])
+                    md = smf.mixedlm(
+                        formula, disk_data, groups=disk_data[config.random_effects[0]]
+                    )
                 else:
                     # Handle generalized LMM
                     md = smf.mixedlm(
                         formula,
-                        df,
-                        groups=df[config.random_effects[0]],
+                        disk_data,
+                        groups=disk_data[config.random_effects[0]],
                         family=config.family,
                         link=config.link,
                     )
@@ -993,8 +1157,8 @@ def _process_lmm_file(args):
                 pvalues[i] = 1.0  # Set to non-significant
                 continue
 
-        # Save results
-        save_base = os.path.join(out_dir, save_name)
+        # Save results to process-specific directory
+        save_base = process_out_dir / save_name
 
         # Save p-values
         np.save(f"{save_base}_pvalues.npy", pvalues)
@@ -1016,6 +1180,42 @@ def _process_lmm_file(args):
             np.save(f"{save_base}_{effect}_coefficients.npy", coefficients[:, j])
             np.save(f"{save_base}_{effect}_std_errors.npy", std_errors[:, j])
 
+        # After processing is complete, merge the results into the main output directory
+        try:
+            for file in process_out_dir.glob("*"):
+                if file.is_file():
+                    target_file = Path(out_dir) / file.name
+                    if target_file.exists():
+                        # If file exists, merge the data
+                        if file.suffix == ".npy":
+                            # For numpy files, we need to handle them differently
+                            source_data = np.load(str(file))
+                            target_data = np.load(str(target_file))
+                            # Combine the data appropriately based on the file type
+                            if "pvalues" in file.name:
+                                # For pvalues, take the minimum (most significant)
+                                combined_data = np.minimum(source_data, target_data)
+                            else:
+                                # For other metrics, take the mean
+                                combined_data = (source_data + target_data) / 2
+                            np.save(str(target_file), combined_data)
+                        else:
+                            # For other files (like plots), just move them
+                            shutil.move(str(file), str(target_file))
+                    else:
+                        # If file doesn't exist, just move it
+                        shutil.move(str(file), str(target_file))
+        except Exception as e:
+            logging.error(f"Error merging results for process {process_id}: {e}")
+        finally:
+            # Clean up the process-specific directory
+            try:
+                shutil.rmtree(process_out_dir)
+            except Exception as e:
+                logging.error(
+                    f"Error cleaning up process directory {process_out_dir}: {e}"
+                )
+
     except Exception as e:
         logging.error(f"Error processing file {file_path}: {e}")
         return
@@ -1026,7 +1226,7 @@ def buan_lmm_plots(
     config: LMMConfig,
     *,
     no_disks: int = 100,
-    out_dir: str = "",
+    out_dir: Path = Path("lmm_plots"),
     num_workers: int | None = None,
     batch_size: int = 5,
     memory_threshold: float = 0.8,
@@ -1035,16 +1235,16 @@ def buan_lmm_plots(
 
     Parameters
     ----------
-    h5_files : list of str
+    h5_files : list of Path
         List of paths to HDF5 files containing metric data
     config : LMMConfig
         LMM configuration specifying model structure
     no_disks : int, optional
         Number of disks used for dividing bundle into segments
         Default is 100
-    out_dir : str, optional
+    out_dir : Path, optional
         Output directory for results
-        Default is current directory
+        Default is lmm_plots in current directory
     num_workers : int, optional
         Number of parallel workers
         Default is None (uses all available cores)
@@ -1063,7 +1263,7 @@ def buan_lmm_plots(
         If not enough memory is available to process files
     """
     # Create output directory
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # Validate input files
     if not h5_files:
@@ -1082,7 +1282,9 @@ def buan_lmm_plots(
 
         # Check memory usage
         available_memory = _get_available_memory()
-        estimated_memory_needed = sum(_estimate_bundle_memory_usage(f) for f in batch)
+        estimated_memory_needed = sum(
+            _estimate_bundle_memory_usage(str(f)) for f in batch
+        )
 
         if estimated_memory_needed > available_memory * memory_threshold:
             logging.warning("Not enough memory for batch. Reducing batch size...")
@@ -1091,7 +1293,7 @@ def buan_lmm_plots(
                 raise MemoryError("Not enough memory to process even a single file")
 
         # Prepare arguments for parallel processing
-        args_list = [(f, no_disks, out_dir, config) for f in batch]
+        args_list = [(f, no_disks, str(out_dir), config) for f in batch]
 
         # Process batch in parallel
         with ProcessPoolExecutor(max_workers=num_workers) as executor:

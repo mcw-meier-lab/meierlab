@@ -1,3 +1,4 @@
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -139,6 +140,27 @@ def test_get_metric_name():
     assert bundle == " "
     assert combined == " "
 
+    # Test with multiple underscores in bundle name
+    path = "CC_ForcepsMajor_FA.h5"
+    metric, bundle, combined = _get_metric_name(path)
+    assert metric == "FA"
+    assert bundle == "CC_ForcepsMajor"
+    assert combined == "CC_ForcepsMajor_FA"
+
+    # Test with hemisphere indicator
+    path = "ILF_R_fintra.h5"
+    metric, bundle, combined = _get_metric_name(path)
+    assert metric == "fintra"
+    assert bundle == "ILF_R"
+    assert combined == "ILF_R_fintra"
+
+    # Test with multiple underscores and hemisphere indicator
+    path = "CC_ForcepsMajor_L_FA.h5"
+    metric, bundle, combined = _get_metric_name(path)
+    assert metric == "FA"
+    assert bundle == "CC_ForcepsMajor_L"
+    assert combined == "CC_ForcepsMajor_L_FA"
+
 
 def test_save_lmm_plot(temp_dir):
     """Test LMM plot saving."""
@@ -156,7 +178,9 @@ def test_process_lmm_file(temp_dir, sample_h5_data):
     """Test LMM file processing."""
     # Create sample H5 file with correct naming convention
     h5_path = temp_dir / "bundle_FA.h5"
-    sample_h5_data.to_hdf(h5_path, key="data", mode="w", format="t", data_columns=True)
+    sample_h5_data.to_hdf(
+        h5_path, key="bundle_FA", mode="w", format="t", data_columns=True
+    )
 
     # Create config
     config = LMMConfig(fixed_effects=["group", "age"], random_effects=["subject_id"])
@@ -176,14 +200,16 @@ def test_buan_lmm_plots(temp_dir, sample_h5_data):
     h5_paths = []
     for i in range(2):
         path = temp_dir / f"test_{i}.h5"
-        sample_h5_data.to_hdf(path, key="data", mode="w", format="t", data_columns=True)
-        h5_paths.append(str(path))
+        sample_h5_data.to_hdf(
+            path, key=f"test_{i}", mode="w", format="t", data_columns=True
+        )
+        h5_paths.append(path)
 
     # Create config
     config = LMMConfig(fixed_effects=["group", "age"], random_effects=["subject_id"])
 
     # Run analysis
-    buan_lmm_plots(h5_files=h5_paths, config=config, no_disks=5, out_dir=str(temp_dir))
+    buan_lmm_plots(h5_files=h5_paths, config=config, no_disks=5, out_dir=temp_dir)
 
     # Check output files
     for i in range(2):
@@ -232,13 +258,30 @@ def test_get_available_memory():
 
 def test_estimate_bundle_memory_usage(temp_dir):
     """Test bundle memory usage estimation."""
-    # Create test file
-    test_file = temp_dir / "test.txt"
-    with open(test_file, "w") as f:
-        f.write("test data")
+    # Create test files
+    trk_file = temp_dir / "test.trk"
+    h5_file = temp_dir / "test.h5"
 
-    estimated_size = _estimate_bundle_memory_usage(str(test_file))
-    assert estimated_size > 0
+    # Write some test data
+    with open(trk_file, "w") as f:
+        f.write("test data" * 1000)  # Create a file of known size
+
+    with open(h5_file, "w") as f:
+        f.write("test data" * 1000)  # Create a file of known size
+
+    # Test .trk file estimation
+    trk_size = os.path.getsize(trk_file)
+    estimated_trk = _estimate_bundle_memory_usage(str(trk_file))
+    assert estimated_trk == trk_size * 3  # Original estimate for .trk files
+
+    # Test .h5 file estimation
+    h5_size = os.path.getsize(h5_file)
+    estimated_h5 = _estimate_bundle_memory_usage(str(h5_file))
+    assert estimated_h5 == h5_size * 5  # New estimate for .h5 files
+
+    # Test non-existent file
+    estimated_missing = _estimate_bundle_memory_usage("nonexistent.trk")
+    assert estimated_missing == 1024 * 1024 * 100  # Default 100MB
 
 
 def test_check_output_exists(temp_dir):
@@ -322,11 +365,8 @@ def test_buan_shape_similarity(temp_dir, sample_bundle_files):
 
         # Run analysis with reduced memory usage and single worker
         buan_shape_similarity(
-            atlas_dir=sample_bundle_files,
             data_dir=data_dir,
             out_dir=out_dir,
-            clust_thr=10,
-            threshold=10,
             num_workers=1,  # Use single worker to avoid process pool issues
             batch_size=1,  # Process one bundle at a time
             memory_threshold=0.5,  # Use less memory
@@ -361,7 +401,17 @@ def test_buan_profiles(temp_dir, sample_bundle_files):
 
     # Create directories
     for dir_path in [model_dir, bundle_dir, orig_dir, anatomical_measures_dir]:
-        dir_path.mkdir(exist_ok=True)
+        dir_path.mkdir(exist_ok=True, parents=True)
+
+    # Create mock subject directory structure
+    subj_dir = temp_dir / "group1" / "subj1"
+    rec_bundles_dir = subj_dir / "rec_bundles"
+    org_bundles_dir = subj_dir / "org_bundles"
+    subj_measures_dir = subj_dir / "anatomical_measures"
+
+    # Create subject directories
+    for dir_path in [rec_bundles_dir, org_bundles_dir, subj_measures_dir]:
+        dir_path.mkdir(parents=True, exist_ok=True)
 
     # Create bundle files in different directories with the same names
     for bundle in sample_bundle_files.glob("*.trk"):
@@ -372,14 +422,14 @@ def test_buan_profiles(temp_dir, sample_bundle_files):
         # Create new files with the same content
         with open(model_dir / bundle.name, "wb") as dst:
             dst.write(content)
-        with open(bundle_dir / bundle.name, "wb") as dst:
+        with open(rec_bundles_dir / bundle.name, "wb") as dst:
             dst.write(content)
-        with open(orig_dir / bundle.name, "wb") as dst:
+        with open(org_bundles_dir / bundle.name, "wb") as dst:
             dst.write(content)
 
     # Create mock metric files in anatomical_measures directory
     for i in range(2):
-        metric_path = anatomical_measures_dir / f"metric_{i}.nii.gz"
+        metric_path = subj_measures_dir / f"metric_{i}.nii.gz"
         metric_path.touch()
 
     # Mock necessary functions
@@ -390,6 +440,7 @@ def test_buan_profiles(temp_dir, sample_bundle_files):
             "meierlab.stats.tractography._estimate_bundle_memory_usage"
         ) as mock_estimate_memory,
         patch("meierlab.stats.tractography._get_available_memory") as mock_get_memory,
+        patch("meierlab.stats.tractography._collect_paths") as mock_collect_paths,
     ):
         # Set up mock return values
         mock_streamlines = Streamlines()
@@ -404,16 +455,21 @@ def test_buan_profiles(temp_dir, sample_bundle_files):
         )
         mock_get_memory.return_value = 1024 * 100  # Return enough memory for the test
 
+        # Mock _collect_paths to return the correct paths
+        mock_collect_paths.return_value = (
+            ["group1"],
+            [subj_dir],
+        )
+
         # Run analysis
         buan_profiles(
             model_bundle_folder=model_dir,
-            bundle_folder=bundle_dir,
-            orig_bundle_folder=orig_dir,
-            metric_folder=anatomical_measures_dir,
-            group_id="test_group",
-            subject="test_subject",
-            out_dir=str(temp_dir),
+            data_dir=temp_dir,
+            out_dir=temp_dir,
+            no_disks=5,
             num_workers=1,
+            batch_size=1,
+            memory_threshold=0.5,
         )
 
 

@@ -1,0 +1,27 @@
+# Deterministic tractography example configuration
+# This configuration demonstrates a basic deterministic tractography pipeline
+# using DTI model and FA-based stopping criterion.
+
+# Output settings
+output_dir: "deterministic_example_output"  # Directory for output files
+num_workers: 4  # Number of parallel workers for processing
+
+# Tracking parameters
+step_size: 0.5  # Step size in mm for streamline propagation
+max_cross: 1    # Maximum number of fiber crossings to handle
+seeds_count: 10000  # Number of seed points to generate
+
+# DTI parameters
+dti_fa_threshold: 0.2  # FA threshold for stopping criterion
+
+# Optimization settings
+optimize_params: true  # Enable parameter optimization
+optimization_metric: "similarity_score"  # Metric to optimize
+n_trials: 20  # Number of optimization trials
+
+# Parameter ranges for optimization
+param_ranges:
+  step_size: [0.1, 1.0]  # Range for step size optimization
+  max_cross: [1, 3]      # Range for max crossings optimization
+  seeds_count: [5000, 20000]  # Range for number of seeds
+  dti_fa_threshold: [0.1, 0.3]  # Range for FA threshold optimization

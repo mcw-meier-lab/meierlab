@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tract Comparison - {{SUBJECT_ID}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .comparison-table {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            margin-bottom: 1rem;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+        .video-container:hover video {
+            transform: scale(1.02);
+        }
+        .metrics-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+        .back-button {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        .pipeline-comparison {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .pipeline-plot {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+        .nav-tabs {
+            margin-bottom: 1rem;
+        }
+        .tab-content {
+            padding: 1rem;
+            background: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header text-center">
+            <h1>Tract Comparison</h1>
+            <p class="lead">{{SUBJECT_ID}} vs. Atlas</p>
+        </div>
+
+        <a href="index.html" class="back-button mb-4 d-inline-block">
+            <i class="fas fa-arrow-left"></i> Back to Subjects
+        </a>
+
+        <ul class="nav nav-tabs" id="comparisonTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tracts-tab" data-bs-toggle="tab" data-bs-target="#tracts" type="button" role="tab">Tracts</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pipelines-tab" data-bs-toggle="tab" data-bs-target="#pipelines" type="button" role="tab">Pipelines</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="comparisonTabsContent">
+            <div class="tab-pane fade show active" id="tracts" role="tabpanel">
+                <div class="comparison-table">
+                    <h2 class="mb-4">Tract Comparisons</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tract Name</th>
+                                <th>Subject</th>
+                                <th>Atlas</th>
+                                <th>Metrics</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{TRACT_ROWS}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="metrics-card">
+                    <h2 class="mb-4">Quality Metrics</h2>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Similarity Score</h5>
+                            <p class="metric-value">{{SIMILARITY_SCORE}}%</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Bundle Volume</h5>
+                            <p class="metric-value">{{BUNDLE_VOLUME}} mm³</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Mean Length</h5>
+                            <p class="metric-value">{{MEAN_LENGTH}} mm</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Curvature</h5>
+                            <p class="metric-value">{{CURVATURE}}°</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pipelines" role="tabpanel">
+                <div class="pipeline-comparison">
+                    <h2 class="mb-4">Pipeline Comparisons</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="pipeline-plot" id="metrics-comparison"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="pipeline-plot" id="similarity-comparison"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="pipeline-plot" id="volume-comparison"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="pipeline-plot" id="curvature-comparison"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to videos
+            const videos = document.querySelectorAll('.video-container video');
+            videos.forEach(video => {
+                video.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.02)';
+                });
+                video.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Initialize pipeline comparison plots
+            if (typeof pipelineData !== 'undefined') {
+                // Metrics comparison plot
+                Plotly.newPlot('metrics-comparison', pipelineData.metricsPlot);
+
+                // Similarity comparison plot
+                Plotly.newPlot('similarity-comparison', pipelineData.similarityPlot);
+
+                // Volume comparison plot
+                Plotly.newPlot('volume-comparison', pipelineData.volumePlot);
+
+                // Curvature comparison plot
+                Plotly.newPlot('curvature-comparison', pipelineData.curvaturePlot);
+            }
+        });
+    </script>
+</body>
+</html>
