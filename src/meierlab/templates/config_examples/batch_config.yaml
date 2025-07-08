@@ -1,0 +1,49 @@
+# Example Batch Processing Configuration
+# This file shows how to configure batch processing with multiple data sources
+
+# Batch Processing Settings
+parallel_processing: true
+max_workers: 4
+retry_failed: true
+max_retries: 3
+
+# Batch Items
+# Each item represents a separate download/processing task
+items:
+  - name: "Dataset_001"
+    type: "xnat"
+    config:
+      address: "https://xnat1.example.com"
+      project: "PROJECT_1"
+      username: "user1"
+      password: "pass1"
+      subject: "SUBJ001"
+      experiment: "EXP001"
+      dcm2nii: true
+      bids: true
+
+  - name: "Dataset_002"
+    type: "xnat"
+    config:
+      address: "https://xnat2.example.com"
+      project: "PROJECT_2"
+      username: "user2"
+      password: "pass2"
+      subject: "SUBJ002"
+      experiment: "EXP002"
+      dcm2nii: false
+      bids: false
+
+  - name: "Local_Data"
+    type: "local"
+    config:
+      source_path: "/path/to/local/data"
+      destination: "/path/to/output"
+      file_pattern: "*.nii.gz"
+
+  - name: "Remote_Data"
+    type: "remote"
+    config:
+      url: "https://example.com/data.zip"
+      destination: "/path/to/downloads"
+      extract: true 
