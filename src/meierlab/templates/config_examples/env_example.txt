@@ -1,0 +1,15 @@
+# Example Environment Variables for MeierLab Templates
+# Copy this file to .env and replace with your actual credentials
+# DO NOT commit .env files to version control!
+
+# XNAT Server Configuration
+XNAT_USERNAME=your_username
+XNAT_PASSWORD=your_password
+
+# Server addresses (optional - can be set in config files)
+XNAT_ADDRESS=https://your-xnat-server.com
+XNAT_PROJECT=YOUR_PROJECT
+
+# Development/Testing credentials (use different values for production)
+# XNAT_USERNAME=test_user
+# XNAT_PASSWORD=test_password

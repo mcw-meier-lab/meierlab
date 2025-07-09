@@ -44,8 +44,42 @@ class BaseDownloadTemplate(ABC):
         if config:
             self.config.update(config)
         
+        # Setup logging first
         self.logger = self._setup_logging()
+        
+        # Load sensitive information from environment variables
+        self._load_env_vars()
+        
         self._validate_config()
+    
+    def _load_env_vars(self) -> None:
+        """
+        Load sensitive information from environment variables.
+        
+        This method looks for environment variables that match configuration
+        keys with a '_ENV' suffix and loads them into the config.
+        For example, XNAT_PASSWORD_ENV will be loaded into the 'password' config key.
+        """
+        env_mappings = self._get_env_mappings()
+        
+        for config_key, env_var in env_mappings.items():
+            if env_var in os.environ:
+                self.config[config_key] = os.environ[env_var]
+                self.logger.debug(f"Loaded {config_key} from environment variable {env_var}")
+    
+    def _get_env_mappings(self) -> Dict[str, str]:
+        """
+        Get mappings from configuration keys to environment variable names.
+        
+        Returns
+        -------
+        dict
+            Mapping of config keys to environment variable names
+        """
+        return {
+            'username': 'XNAT_USERNAME',
+            'password': 'XNAT_PASSWORD',
+        }
     
     @abstractmethod
     def _get_default_config(self) -> Dict[str, Any]:
@@ -219,7 +253,7 @@ class BaseDownloadTemplate(ABC):
         
         return config
     
-    def save_config_to_file(self, config_path: str) -> None:
+    def save_config_to_file(self, config_path: str, exclude_sensitive: bool = True) -> None:
         """
         Save current configuration to a file.
         
@@ -227,6 +261,8 @@ class BaseDownloadTemplate(ABC):
         ----------
         config_path : str
             Path to save the configuration file
+        exclude_sensitive : bool
+            Whether to exclude sensitive information (passwords, tokens, etc.)
         """
         import json
         import yaml
@@ -236,11 +272,20 @@ class BaseDownloadTemplate(ABC):
         # Create parent directories if they don't exist
         config_path.parent.mkdir(parents=True, exist_ok=True)
         
+        # Create a copy of config for saving
+        save_config = self.config.copy()
+        
+        if exclude_sensitive:
+            sensitive_keys = ['password', 'api_key', 'token', 'secret']
+            for key in sensitive_keys:
+                if key in save_config:
+                    save_config[key] = f"<{key.upper()}_FROM_ENV>"
+        
         with open(config_path, 'w') as f:
             if config_path.suffix.lower() in ['.yaml', '.yml']:
-                yaml.dump(self.config, f, default_flow_style=False, indent=2)
+                yaml.dump(save_config, f, default_flow_style=False, indent=2)
             elif config_path.suffix.lower() == '.json':
-                json.dump(self.config, f, indent=2)
+                json.dump(save_config, f, indent=2)
             else:
                 raise ValueError(f"Unsupported configuration file format: {config_path.suffix}")
         

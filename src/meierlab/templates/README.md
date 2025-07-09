@@ -266,16 +266,73 @@ template.run()  # Will show what would be done without doing it
 - Batch configuration files
 - Progress tracking
 
+## Handling Private Information
+
+### Environment Variables (Recommended)
+
+The template system automatically loads sensitive information from environment variables:
+
+```bash
+# Set environment variables
+export XNAT_USERNAME=your_username
+export XNAT_PASSWORD=your_password
+
+# Run template (credentials loaded automatically)
+python -m meierlab.templates.cli xnat --config config.yaml
+```
+
+### .env Files
+
+Create a `.env` file in your project directory:
+
+```bash
+# .env
+XNAT_USERNAME=your_username
+XNAT_PASSWORD=your_password
+```
+
+**Important**: Add `.env` to your `.gitignore` file to prevent committing credentials:
+
+```bash
+echo ".env" >> .gitignore
+```
+
+### Test Credentials
+
+For testing, use the test configuration utilities:
+
+```python
+from meierlab.templates.test_config import ConfigManager
+
+# Create test configuration with secure credentials
+manager = ConfigManager()
+config_file = manager.create_test_config('xnat')
+
+# Use in tests
+template = XNATDownloadTemplate()
+template.load_config_from_file(config_file)
+```
+
+### Command Line with Environment Variables
+
+```bash
+# Set credentials inline (not recommended for production)
+XNAT_USERNAME=user XNAT_PASSWORD=pass python -m meierlab.templates.cli xnat
+
+# Use a .env file
+source .env && python -m meierlab.templates.cli xnat
+```
+
 ## Configuration File Formats
 
-### YAML Configuration
+### YAML Configuration (Without Sensitive Data)
 
 ```yaml
-# Example YAML configuration
+# Example YAML configuration (credentials from environment)
 address: "https://example.com"
 project: "MY_PROJECT"
-username: "user"
-password: "pass"
+username: "${XNAT_USERNAME}"  # Loaded from environment
+password: "${XNAT_PASSWORD}"  # Loaded from environment
 working_directory: "/path/to/data"
 dcm2nii: true
 bids: true
@@ -306,28 +363,37 @@ dry_run: false
 - Use environment variables for secrets
 - Validate configurations before use
 
-### 2. Error Handling
+### 2. Security Best Practices
+
+- **Never commit passwords to version control**
+- Use environment variables for all sensitive data
+- Create `.env` files for local development (add to `.gitignore`)
+- Use different credentials for testing vs production
+- Regularly rotate passwords and API keys
+- Use secure credential storage in production environments
+
+### 3. Error Handling
 
 - Always validate configuration
 - Handle network errors gracefully
 - Provide meaningful error messages
 - Use dry run mode for testing
 
-### 3. Logging
+### 4. Logging
 
 - Use appropriate log levels
 - Include context in log messages
 - Log progress for long-running operations
 - Consider log file rotation
 
-### 4. Customization
+### 5. Customization
 
 - Inherit from appropriate base class
 - Override only necessary methods
 - Maintain backward compatibility
 - Document custom features
 
-### 5. Testing
+### 6. Testing
 
 - Test with dry run mode
 - Use small datasets for testing

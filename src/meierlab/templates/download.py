@@ -58,11 +58,11 @@ class XNATDownloadTemplate(BaseDownloadTemplate):
             Default configuration dictionary
         """
         return {
-            'address': 'https://cirxnat2.rcc.mcw.edu',
-            'project': 'CSI_MRI_MCW',
+            'address': 'https://test.xnat.org',
+            'project': 'TEST_PROJECT',
             'username': None,
             'password': None,
-            'working_directory': '/scratch/g/mmccrea/CSI/testing',
+            'working_directory': '/tmp/test',
             'subject': '',
             'experiment': '',
             'list_file': '',
@@ -87,8 +87,10 @@ class XNATDownloadTemplate(BaseDownloadTemplate):
             if not self.config.get(field):
                 raise ValueError(f"Required configuration field '{field}' is missing or empty")
         
-        if not self.config.get('username') or not self.config.get('password'):
-            raise ValueError("Username and password are required for XNAT authentication")
+        # Only require credentials if not in dry run mode
+        if not self.config.get('dry_run', False):
+            if not self.config.get('username') or not self.config.get('password'):
+                raise ValueError("Username and password are required for XNAT authentication")
     
     def _add_arguments(self, parser):
         """

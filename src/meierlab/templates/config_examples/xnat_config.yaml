@@ -2,13 +2,13 @@
 # This file shows how to configure the XNAT download template
 
 # XNAT Server Configuration
-address: "https://cirxnat2.rcc.mcw.edu"
-project: "CSI_MRI_MCW"
+address: "https://test.xnat.org"
+project: "TEST_PROJECT"
 username: "your_username"  # Replace with your actual username
 password: "your_password"  # Replace with your actual password
 
 # Working Directory
-working_directory: "/scratch/g/mmccrea/CSI/testing"
+working_directory: "/tmp/test"
 
 # Download Options
 subject: ""  # Leave empty for all subjects, or specify a subject ID

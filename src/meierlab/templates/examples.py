@@ -119,11 +119,14 @@ class MinimalDownloadTemplate(BaseDownloadTemplate):
     
     def _validate_config(self) -> None:
         """Validate minimal configuration."""
+        # Always validate source_url, even in dry run mode
         if not self.config.get('source_url'):
             raise ValueError("source_url is required")
         
-        if not self.config.get('destination_dir'):
-            raise ValueError("destination_dir is required")
+        # Only validate destination_dir if not in dry run mode
+        if not self.config.get('dry_run', False):
+            if not self.config.get('destination_dir'):
+                raise ValueError("destination_dir is required")
     
     def _add_arguments(self, parser):
         """Add minimal command line arguments."""
