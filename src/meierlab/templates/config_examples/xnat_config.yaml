@@ -25,4 +25,4 @@ scan_list: []  # List of specific scan types to download
 
 # Template Options
 dry_run: false  # Set to true for a dry run without downloading
-verbose: true  # Enable verbose logging 
+verbose: true  # Enable verbose logging

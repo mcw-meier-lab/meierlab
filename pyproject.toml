@@ -109,6 +109,8 @@ lint.extend-select = [
   "RUF",         # Ruff-specific
   "UP",          # pyupgrade
 ]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
 
 [dependency-groups]
 dev = [

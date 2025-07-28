@@ -35,4 +35,4 @@ allowed_scan_types:
 
 # Template Options
 dry_run: false
-verbose: true 
+verbose: true

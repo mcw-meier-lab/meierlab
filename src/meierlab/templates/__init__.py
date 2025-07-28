@@ -16,15 +16,18 @@ __all__ = [
 # Import example templates
 try:
     from .examples import (
+        BatchProcessingTemplate,
         CustomXNATDownloadTemplate,
         MinimalDownloadTemplate,
-        BatchProcessingTemplate
     )
-    __all__.extend([
-        "CustomXNATDownloadTemplate",
-        "MinimalDownloadTemplate", 
-        "BatchProcessingTemplate"
-    ])
+
+    __all__.extend(
+        [
+            "BatchProcessingTemplate",
+            "CustomXNATDownloadTemplate",
+            "MinimalDownloadTemplate",
+        ]
+    )
 except ImportError:
     # Examples might not be available in all environments
-    pass 
+    pass

@@ -1,0 +1,117 @@
+# ExploreASL Quality Check Configuration
+# This file can be used to customize quality thresholds and settings
+
+# Structural MRI quality metrics
+structural_metrics:
+  T1w_SNR_GM_Ratio:
+    min: 8
+    max: null
+    description: "Signal-to-noise ratio for gray matter"
+  T1w_CNR_GM_WM_Ratio:
+    min: 1.2
+    max: null
+    description: "Contrast-to-noise ratio between GM and WM"
+  T1w_FBER_WMref_Ratio:
+    min: 0.8
+    max: null
+    description: "Foreground-background energy ratio"
+  T1w_EFC_bits:
+    min: null
+    max: 0.4
+    description: "Entropy focus criterion"
+  T1w_Mean_AI_Perc:
+    min: 0.8
+    max: 1.2
+    description: "Mean asymmetry index percentage"
+  T1w_SD_AI_Perc:
+    min: null
+    max: 0.1
+    description: "Standard deviation of asymmetry index"
+  T1w_IQR_Perc:
+    min: null
+    max: 0.1
+    description: "Interquartile range percentage"
+
+# ASL/CBF quality metrics
+asl_metrics:
+  CBF_GM_Median_mL100gmin:
+    min: 30
+    max: 80
+    description: "Median CBF in gray matter (mL/100g/min)"
+  CBF_GM_PVC2_mL100gmin:
+    min: 35
+    max: 85
+    description: "Partial volume corrected CBF in gray matter"
+  CBF_WM_PVC2_mL100gmin:
+    min: 15
+    max: 35
+    description: "Partial volume corrected CBF in white matter"
+  CBF_GM_WM_Ratio:
+    min: 2.0
+    max: 4.0
+    description: "Ratio of GM to WM CBF"
+  RMSE_Perc:
+    min: null
+    max: 15
+    description: "Root mean square error percentage"
+  nRMSE_Perc:
+    min: null
+    max: 10
+    description: "Normalized RMSE percentage"
+  Mean_SSIM_Perc:
+    min: 80
+    max: null
+    description: "Mean structural similarity index"
+  PeakSNR_Ratio:
+    min: 20
+    max: null
+    description: "Peak signal-to-noise ratio"
+  AI_Perc:
+    min: 0.8
+    max: 1.2
+    description: "Asymmetry index percentage"
+
+
+# Plot settings
+plot_settings:
+  box_points: "all"  # "all", "outliers", "suspectedoutliers", False
+  violin_points: "all"
+  histogram_bins: 20
+  correlation_method: "pearson"  # "pearson", "spearman", "kendall"
+
+# Output settings
+output_formats: ["html", "png"]
+dash_app: true
+
+# Logging
+log_level: "INFO"  # "DEBUG", "INFO", "WARNING", "ERROR"
+
+# Optional: Custom regional CBF thresholds
+regional_cbf_metrics:
+  Caudate:
+    min: 40
+    max: 70
+  Putamen:
+    min: 45
+    max: 75
+  Thalamus:
+    min: 35
+    max: 65
+  Frontal:
+    min: 30
+    max: 60
+  Parietal:
+    min: 30
+    max: 60
+  Temporal:
+    min: 30
+    max: 60
+  Occipital:
+    min: 35
+    max: 65
+  Insula:
+    min: 35
+    max: 65
+  Cerebellum:
+    min: 25
+    max: 55

@@ -7,7 +7,7 @@ __version__ = version("meierlab")
 from .templates import BaseDownloadTemplate, XNATDownloadTemplate
 
 __all__ = [
-    "__version__",
-    "BaseDownloadTemplate", 
+    "BaseDownloadTemplate",
     "XNATDownloadTemplate",
+    "__version__",
 ]

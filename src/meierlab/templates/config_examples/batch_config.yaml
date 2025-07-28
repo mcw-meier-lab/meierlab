@@ -46,4 +46,4 @@ items:
     config:
       url: "https://example.com/data.zip"
       destination: "/path/to/downloads"
-      extract: true 
+      extract: true

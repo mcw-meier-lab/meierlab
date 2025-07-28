@@ -84,7 +84,7 @@ from typing import Dict, Any
 
 class MyCustomTemplate(BaseDownloadTemplate):
     """My custom download template."""
-    
+
     def _get_default_config(self) -> Dict[str, Any]:
         """Define default configuration."""
         return {
@@ -92,27 +92,27 @@ class MyCustomTemplate(BaseDownloadTemplate):
             'destination': './downloads',
             'file_pattern': '*'
         }
-    
+
     def _validate_config(self) -> None:
         """Validate configuration."""
         if not self.config.get('source_url'):
             raise ValueError("source_url is required")
-    
+
     def _add_arguments(self, parser):
         """Add custom command line arguments."""
         parser.add_argument('--source', required=True, help='Source URL')
         parser.add_argument('--dest', default='./downloads', help='Destination')
-    
+
     def run(self) -> None:
         """Main execution logic."""
         args = self.parse_arguments()
-        
+
         # Update config with command line arguments
         self.config.update({
             'source_url': args.source,
             'destination': args.dest
         })
-        
+
         # Your custom logic here
         self.logger.info(f"Downloading from {self.config['source_url']}")
         self.create_folder(self.config['destination'])
@@ -126,7 +126,7 @@ from typing import Dict, Any
 
 class CustomXNATTemplate(XNATDownloadTemplate):
     """Custom XNAT template with additional features."""
-    
+
     def _get_default_config(self) -> Dict[str, Any]:
         """Extend default configuration."""
         config = super()._get_default_config()
@@ -136,32 +136,32 @@ class CustomXNATTemplate(XNATDownloadTemplate):
             'max_file_size_gb': 10
         })
         return config
-    
+
     def _validate_config(self) -> None:
         """Add custom validation."""
         super()._validate_config()
-        
+
         if self.config.get('max_file_size_gb', 0) <= 0:
             raise ValueError("max_file_size_gb must be positive")
-    
+
     def _setup(self, download_dict):
         """Override setup with custom logic."""
         # Custom preprocessing
         if self.config.get('quality_check'):
             self._perform_quality_check(download_dict)
-        
+
         # Call parent setup
         super()._setup(download_dict)
-        
+
         # Custom post-processing
         if self.config.get('backup_files'):
             self._backup_files(download_dict)
-    
+
     def _perform_quality_check(self, download_dict):
         """Custom quality check logic."""
         self.logger.info("Performing quality checks...")
         # Your quality check logic here
-    
+
     def _backup_files(self, download_dict):
         """Custom backup logic."""
         self.logger.info("Backing up files...")
@@ -452,4 +452,4 @@ To contribute new templates:
 
 ## License
 
-This template system is part of the MeierLab package and follows the same license terms. 
+This template system is part of the MeierLab package and follows the same license terms.
