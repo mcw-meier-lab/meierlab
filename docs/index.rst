@@ -54,7 +54,28 @@ Welcome to the MCW Meier Lab documentation!
 
 Featured examples
 -----------------
-**In progress**
+
+.. grid::
+
+   .. grid-item-card:: :fas:`chart-line` ExploreASL Quality Assessment
+      :link: auto_examples/02_preproc/exploreasl_quality_example.html
+      :link-type: url
+      :columns: 12 12 6 6
+      :class-card: sd-shadow-md
+      :class-title: sd-text-primary
+      :margin: 2 2 0 0
+
+      Comprehensive quality assessment for ExploreASL processed data with configurable metrics and interactive visualizations.
+
+   .. grid-item-card:: :fas:`brain` Atlas Visualization
+      :link: auto_examples/01_plotting/plot_atlas.html
+      :link-type: url
+      :columns: 12 12 6 6
+      :class-card: sd-shadow-md
+      :class-title: sd-text-primary
+      :margin: 2 2 0 0
+
+      Plot and visualize brain atlases and parcellations.
 
 
 .. toctree::

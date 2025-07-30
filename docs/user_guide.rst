@@ -17,3 +17,4 @@ Table of Contents
     introduction.rst
     networks/index.rst
     viz/index.rst
+    quality/index.rst

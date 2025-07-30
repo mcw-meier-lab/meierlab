@@ -9,6 +9,9 @@ Examples
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -26,10 +29,11 @@ See :ref:`viz` for more details.
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Plot the regions of a reference atlas or parcellation. Schaefer 2018, 400 Parcels, 7 Networks, ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot the regions of a reference atlas or parcellation. Schaefer 2018, 400 Parcels, 7 Networks, with updated labels.">
 
 .. only:: html
 
@@ -43,6 +47,8 @@ See :ref:`viz` for more details.
       <div class="sphx-glr-thumbnail-title">Basic Atlas plotting</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
