@@ -1,4 +1,5 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+# fmt: off
 """XNAT base for python3 using requests."""
 
 import json
@@ -768,3 +769,5 @@ class Cirxnat:
             proj_df = pd.concat([proj_df, exp_df])
 
         return proj_df
+
+# fmt: on

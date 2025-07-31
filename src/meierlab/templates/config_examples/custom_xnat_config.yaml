@@ -1,0 +1,38 @@
+# Example Custom XNAT Download Configuration
+# This file shows how to configure the custom XNAT download template with additional features
+
+# Inherit from base XNAT configuration
+address: "https://test.xnat.org"
+project: "TEST_PROJECT"
+username: "your_username"
+password: "your_password"
+working_directory: "/tmp/test"
+
+# Download Options
+subject: ""
+experiment: ""
+list_file: ""
+dcm2nii: true
+bids: true
+scan: "all"
+scan_list: []
+
+# Custom Processing Options
+preprocess_data: true  # Enable custom preprocessing
+quality_check: true  # Enable quality checks
+backup_original: true  # Backup original files
+
+# File Size Limits
+max_file_size_gb: 10  # Maximum file size in GB
+
+# Allowed Scan Types
+allowed_scan_types:
+  - "T1w"
+  - "T2w"
+  - "dwi"
+  - "bold"
+  - "FLAIR"
+
+# Template Options
+dry_run: false
+verbose: true

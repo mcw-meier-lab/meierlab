@@ -1,0 +1,28 @@
+# Example XNAT Download Configuration
+# This file shows how to configure the XNAT download template
+
+# XNAT Server Configuration
+address: "https://test.xnat.org"
+project: "TEST_PROJECT"
+username: "your_username"  # Replace with your actual username
+password: "your_password"  # Replace with your actual password
+
+# Working Directory
+working_directory: "/tmp/test"
+
+# Download Options
+subject: ""  # Leave empty for all subjects, or specify a subject ID
+experiment: ""  # Leave empty for all experiments, or specify an experiment ID
+list_file: ""  # Path to a file containing list of subjects/experiments to download
+
+# Processing Options
+dcm2nii: true  # Convert DICOM to NIfTI
+bids: true  # Convert to BIDS format
+
+# Scan Selection
+scan: "all"  # "all" for all scans, or specify a scan type
+scan_list: []  # List of specific scan types to download
+
+# Template Options
+dry_run: false  # Set to true for a dry run without downloading
+verbose: true  # Enable verbose logging
